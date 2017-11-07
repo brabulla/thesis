@@ -1,0 +1,24 @@
+\select@language {magyar} \contentsline {chapter}{\numberline {1}Bevezet\IeC {\'e}s}{1}{chapter.1}
+\select@language {magyar} \contentsline {section}{\numberline {1.1}A dolgozat c\IeC {\'e}lja \IeC {\'e}s fel\IeC {\'e}p\IeC {\'\i }t\IeC {\'e}se }{1}{section.1.1}
+\select@language {magyar} \contentsline {section}{\numberline {1.2}Security Information and Event Management}{2}{section.1.2}
+\select@language {magyar} \contentsline {section}{\numberline {1.3}Identity management}{3}{section.1.3}
+\select@language {magyar} \contentsline {section}{\numberline {1.4}A feladat specifik\IeC {\'a}l\IeC {\'a}sa}{3}{section.1.4}
+\select@language {magyar} \contentsline {subsection}{\numberline {1.4.1}Integr\IeC {\'a}ci\IeC {\'o} TDI seg\IeC {\'\i }ts\IeC {\'e}g\IeC {\'e}vel}{4}{subsection.1.4.1}
+\select@language {magyar} \contentsline {subsection}{\numberline {1.4.2}WAS alkalmaz\IeC {\'a}s form\IeC {\'a}j\IeC {\'a}ban}{4}{subsection.1.4.2}
+\select@language {magyar} \contentsline {chapter}{\numberline {2}Irodalomkutat\IeC {\'a}s \IeC {\'e}s a felhaszn\IeC {\'a}lt technol\IeC {\'o}gi\IeC {\'a}k}{6}{chapter.2}
+\select@language {magyar} \contentsline {section}{\numberline {2.1}A felhaszn\IeC {\'a}lt technol\IeC {\'o}gi\IeC {\'a}k ismertet\IeC {\'e}se}{6}{section.2.1}
+\select@language {magyar} \contentsline {subsection}{\numberline {2.1.1}IBM Security QRadar SIEM}{6}{subsection.2.1.1}
+\select@language {magyar} \contentsline {subsection}{\numberline {2.1.2}IBM Security Identity Manager - ISIM}{8}{subsection.2.1.2}
+\select@language {magyar} \contentsline {subsection}{\numberline {2.1.3}Tivoli Directory Integrator - TDI}{8}{subsection.2.1.3}
+\select@language {magyar} \contentsline {chapter}{\numberline {3}Feladat megval\IeC {\'o}s\IeC {\'\i }t\IeC {\'a}sa}{10}{chapter.3}
+\select@language {magyar} \contentsline {section}{\numberline {3.1}Wrapper fejleszt\IeC {\'e}se QRadar-hoz}{10}{section.3.1}
+\select@language {magyar} \contentsline {section}{\numberline {3.2}TDI Integr\IeC {\'a}ci\IeC {\'o} megval\IeC {\'o}s\IeC {\'\i }t\IeC {\'a}sa}{12}{section.3.2}
+\select@language {magyar} \contentsline {subsection}{\numberline {3.2.1}QRadar connector fejleszt\IeC {\'e}se TDI-hoz}{12}{subsection.3.2.1}
+\select@language {magyar} \contentsline {subsection}{\numberline {3.2.2}Connector tesztel\IeC {\'e}se}{14}{subsection.3.2.2}
+\select@language {magyar} \contentsline {section}{\numberline {3.3}WAS integr\IeC {\'a}ci\IeC {\'o} megval\IeC {\'o}s\IeC {\'\i }t\IeC {\'a}sa}{14}{section.3.3}
+\select@language {magyar} \contentsline {subsection}{\numberline {3.3.1}Architekt\IeC {\'u}ra tervez\IeC {\'e}se}{15}{subsection.3.3.1}
+\select@language {magyar} \contentsline {section}{\numberline {3.4}Query-k implement\IeC {\'a}ci\IeC {\'o}ja}{15}{section.3.4}
+\select@language {magyar} \contentsline {section}{\numberline {3.5}QRadar esem\IeC {\'e}ny k\IeC {\"u}ld\IeC {\H o} fejleszt\IeC {\'e}se}{16}{section.3.5}
+\select@language {magyar} \contentsline {subsection}{\numberline {3.5.1}TDI alap\IeC {\'u} syslog k\IeC {\"u}ld\IeC {\H o} fejleszt\IeC {\'e}se}{16}{subsection.3.5.1}
+\select@language {magyar} \contentsline {subsection}{\numberline {3.5.2}QRadar oldali esem\IeC {\'e}ny fogad\IeC {\'o} fejleszt\IeC {\'e}se}{16}{subsection.3.5.2}
+\select@language {magyar} \contentsline {chapter}{\numberline {4}\IeC {\"O}sszefoglal\IeC {\'a}s}{17}{chapter.4}
