@@ -19,6 +19,6 @@
 \select@language {magyar} \contentsline {subsection}{\numberline {3.3.1}Architekt\IeC {\'u}ra tervez\IeC {\'e}se}{15}{subsection.3.3.1}
 \select@language {magyar} \contentsline {section}{\numberline {3.4}Query-k implement\IeC {\'a}ci\IeC {\'o}ja}{15}{section.3.4}
 \select@language {magyar} \contentsline {section}{\numberline {3.5}QRadar esem\IeC {\'e}ny k\IeC {\"u}ld\IeC {\H o} fejleszt\IeC {\'e}se}{16}{section.3.5}
-\select@language {magyar} \contentsline {subsection}{\numberline {3.5.1}TDI alap\IeC {\'u} syslog k\IeC {\"u}ld\IeC {\H o} fejleszt\IeC {\'e}se}{16}{subsection.3.5.1}
-\select@language {magyar} \contentsline {subsection}{\numberline {3.5.2}QRadar oldali esem\IeC {\'e}ny fogad\IeC {\'o} fejleszt\IeC {\'e}se}{16}{subsection.3.5.2}
-\select@language {magyar} \contentsline {chapter}{\numberline {4}\IeC {\"O}sszefoglal\IeC {\'a}s}{17}{chapter.4}
+\select@language {magyar} \contentsline {subsection}{\numberline {3.5.1}TDI alap\IeC {\'u} syslog k\IeC {\"u}ld\IeC {\H o} fejleszt\IeC {\'e}se}{17}{subsection.3.5.1}
+\select@language {magyar} \contentsline {subsection}{\numberline {3.5.2}QRadar oldali esem\IeC {\'e}ny fogad\IeC {\'o} fejleszt\IeC {\'e}se}{18}{subsection.3.5.2}
+\select@language {magyar} \contentsline {chapter}{\numberline {4}\IeC {\"O}sszefoglal\IeC {\'a}s}{19}{chapter.4}
