@@ -190,21 +190,36 @@ A következő lépés az adatok átalakítása volt a QRadar számára könnyen 
 	\item Az új sor karakterek eltávolítása, valamint a pontosvesszők \todo kieszképelése az attribútumok értékeiből.
 \end{itemize} 
 
-Ebből tehát ehhez hasonló sorok adódtak:
+%Ebből tehát ehhez hasonló sorok adódtak:
 
-RÖVIDTÁBLANÉV\_OSZLOPNÉV=ÉRTÉK;RÖVIDTÁBLANÉV\_OSZLOPNÉV=ÉRTÉK;RÖVIDTÁBLANÉV\_OSZLOPNÉV=ÉRTÉK;...
+%RÖVIDTÁBLANÉV\_OSZLOPNÉV=ÉRTÉK;RÖVIDTÁBLANÉV\_OSZLOPNÉV=ÉRTÉK;RÖVIDTÁBLANÉV\_OSZLOPNÉV=ÉRTÉK;...
 
 
 A generálás utolsó lépése a sorok felküldése volt syslog protokollon keresztül a QRadar megfelelő fogadó interfészére. Ehhez a beépített Log connector-t használtam, egy egyedileg configurált Log4J logger segítségével. Az egyedi konfiguráció definiálja, hogy a beépített syslog logger legyen a használt logolási mód, milyen IP-re és portra küldjük az üzeneteket, valamint milyen formátumban.
 
-A Log4J által biztosított syslog logger azonban alapértelmezetten nem volt megfelelő erre a célra, mivel úgy implementálták azt, hogy az 1019 byte-nál hosszabb üzeneteket tördelje megfelelő méretűvé, és több részben küldje tovább. Ez a QRadar oldalán azt okozta, hogy a logsor tördeklékek külön eseményenként kerültek rögzítésre, ami nem volt megfelelő a kívánt működés szempontjából.
+A Log4J által biztosított syslog logger azonban alapértelmezetten nem volt megfelelő erre a célra, mivel úgy implementálták azt, hogy az 1019 byte-nál hosszabb üzeneteket tördelje megfelelő méretűvé, és több részben küldje tovább. Ez a QRadar oldalán azt okozta, hogy a logsor tördelékek külön eseményenként kerültek rögzítésre, ami nem volt megfelelő a kívánt működés szempontjából. A QRadar azonban biztosít egy megoldást a töredékek kezelésére: az UDP multiline syslog\footnote{ \href{https://www.ibm.com/support/knowledgecenter/SS42VS_7.2.2/com.ibm.qradar.doc_7.2.2/t_logsource_UDPmultiprotocol.html}{UDP multiline syslog dokumentáció}} kezelést, amihez a töredék üzeneteket ki kellett egészítenem azonosítókkal.
 
 A probléma megoldására átalakítottam a TDI assembly line-t úgy, hogy a tördelési műveletet saját magam végzem, a megadott szabályok szerint. A tényleges payload-ot maximum 800 karakter méretű szeletekre tördelem, figyelve az attribútum határokat jelölő pontosvesszőkre. Így, a képzett syslog header-rel együtt, az üzenetek nem haladják meg a limitet, és egyben kerülnek elküldésre. 
 
-Ezek után a QRadar oldali fogadást kellett biztosítanom. A QRadar támogatja a több sorból álló syslog üzenetek egy eseménnyé fűzését, az ún. UDP multiline syslog \footnote{ \href{https://www.ibm.com/support/knowledgecenter/SS42VS_7.2.2/com.ibm.qradar.doc_7.2.2/t_logsource_UDPmultiprotocol.html}{UDP multiline syslog dokumentáció}} 
-segítségével. Ezt egy eseményforrás felkonfigurálásánál kell megadni, és annyiban különbözik az átlagos syslog protokollon érkező üzenetektől, hogy az 514-es port helyett az 517-est használja, valamint a beérkező üzeneteknek rendelkeznie kell egy azonosítóval. Ha az azonosító két vagy több üzenetben megegyezik, akkor azokat a QRadar összefűzi egy eseménnyé.
-
-A szükséges egyedi azonosítókat szintén TDI-ban generálom. Mivel nem kriptográfiailag biztonságos véletlenek generálásáról van szó, hanem csak egy megfelelően nagy spektrumban egyedi azonosítókról, ezért ehhez egy egyszerű, Javascript alapú pszeudo random uuid generálást használok. Ez 8 darab 0000 - ffff értékig terjedő stringből áll, ami összesen $16^{4 * 8} $ darab egyedi kombinációt ad, ami a feladat szempontjából elégséges méretű tartományt ad.
+A szükséges egyedi azonosítókat szintén TDI-ban generálom. Mivel nem kriptográfiailag biztonságos véletlenek generálásáról van szó, hanem csak egy megfelelően nagy spektrumban egyedi azonosítókról, ezért ehhez egy egyszerű, Javascript alapú pszeudo random uuid generálást használok. Ez 8 darab 0000 - ffff értékig terjedő stringből áll, ami összesen $16^{4 * 8} $ darab egyedi kombinációt ad, ami a feladat szempontjából elégséges méretű tartományt. Ezzel a lépéssel az adatok előálltak, és a QRadar számára olvasható formátumba kerültek.
 
 
 \subsection{QRadar oldali esemény fogadó fejlesztése}
+
+Ezek után a QRadar oldali fogadást kellett biztosítanom. Ezt a már említett UDP multiline syslog segítségével tettem. Ezt egy eseményforrás felkonfigurálásánál kell megadni, és annyiban különbözik az átlagos syslog protokollon érkező üzenetektől, hogy az 514-es port helyett az 517-est használja, valamint a beérkező üzeneteknek rendelkeznie kell egy azonosítóval. Ha az azonosító két vagy több üzenetben megegyezik, akkor azokat a QRadar összefűzi egy eseménnyé.
+
+Ezek alapján felkonfiguráltam egy új eseményforrást IBM Identity Manager néven, ami UDP multiline syslog-okat fogad. Ezek azonosításáhor egy \textit{msg\_uuid} mezőt keres, az alábbi regex segítségével: 
+
+\begin{lstlisting}
+msg_uuid=(.*?[^\\]);
+\end{lstlisting}
+
+Ezután a QRadar-t kellett felkészítenem az események kezelésére. Ehhez létrehoztam egy saját esemény típust, amelyet egy saját syslog header alapján azonosítok. A típus határozza meg, hogy a QRadar milyen szabályok szerint, milyen attribútumokat próbál meg az azonosított eseményből feldolgozni, valamint azokat hogyan használja fel a továbbiakban. Ehhez elkészítettem az összes lehetséges felküldött attribútumhoz a megfelelő regex kifejezést. Mivel az adatok normalizálásánál egy egységes szisztémát követtem, ezért az összes parse-oló regex az alábbi sémára épül:
+
+\begin{lstlisting}
+	ATTRIBÚTUM_NÉV=(.*?[^\\]);
+\end{lstlisting}
+
+Ennél a reguláris kifejezésnél az attribútum értéke pontosan az első találati csoportban érhető el, valamint a felépítése miatt megfelelően kezeli az \todo eszképelt pontosvesszőket is.
+
+\todo Screenshot előtte, utána\\

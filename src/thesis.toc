@@ -21,4 +21,4 @@
 \select@language {magyar} \contentsline {section}{\numberline {3.5}QRadar esem\IeC {\'e}ny k\IeC {\"u}ld\IeC {\H o} fejleszt\IeC {\'e}se}{16}{section.3.5}
 \select@language {magyar} \contentsline {subsection}{\numberline {3.5.1}TDI alap\IeC {\'u} syslog k\IeC {\"u}ld\IeC {\H o} fejleszt\IeC {\'e}se}{17}{subsection.3.5.1}
 \select@language {magyar} \contentsline {subsection}{\numberline {3.5.2}QRadar oldali esem\IeC {\'e}ny fogad\IeC {\'o} fejleszt\IeC {\'e}se}{18}{subsection.3.5.2}
-\select@language {magyar} \contentsline {chapter}{\numberline {4}\IeC {\"O}sszefoglal\IeC {\'a}s}{19}{chapter.4}
+\select@language {magyar} \contentsline {chapter}{\numberline {4}\IeC {\"O}sszefoglal\IeC {\'a}s}{20}{chapter.4}
