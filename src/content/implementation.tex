@@ -40,8 +40,9 @@ A TDI alapú megoldás célja egy olyan keret, és hozzá tartozó proof of conc
 A megvalósításhoz szükség volt elsősorban egy connector létrehozására, majd ezt felhasználva implementáltam néhány tényleges megoldást, általunk, valamint az ügyfél által definiált esetekre.
 % Mod
  
-\subsection{QRadar connector fejlesztése TDI-hoz}
-A projekt következő lépése a connector fejlesztése volt a TDI és a QRadar közti integrációhoz. Ehhez segítségemre volt a hivatalos útmutató\footnote{\url{https://www.ibm.com/support/knowledgecenter/SSCQGF_7.1.1/com.ibm.IBMDI.doc_7.1.1/referenceguide177.htm}} connector fejlesztéshez, ami az IBM oldalán megtalálható. Egy saját connector fejlesztése TDI alatt abból áll, hogy létrehozunk egy új Java osztályt ami implementálja a megfelelő, TDI által specifikált interfészt, ennek metódusain belül elkészítjük a kívánt üzleti logikát, majd egy xml leíró fájllal együtt, a megfelelő struktúrában becsomagoljuk azt egy JAR fájlba, amit a TDI által használt könyvtárak egyikébe másolunk. 
+\subsection{QRadar connector fejlesztése TD-Ihoz}
+
+A projekt következő lépése a connector fejlesztése volt a TDI és a QRadar közti integrációhoz. Ehhez segítségemre volt a hivatalos útmutató connector fejlesztéshez, ami az IBM oldalán megtalálható. Egy saját connector fejlesztése TDI alatt abból áll, hogy létrehozunk egy új Java osztályt ami implementálja a megfelelő, TDI által specifikált interfészt, ennek metódusain belül elkészítjük a kívánt üzleti logikát, majd egy xml leíró fájllal együtt, a megfelelő struktúrában becsomagoljuk azt egy JAR fájlba, amit a TDI által használt könyvtárak egyikébe másolunk. 
 
 Alapvetően hat működési módja lehet egy connector-nak, amit a feljebb említett dokumentum specifikál. Ezek a következők:
 
@@ -110,6 +111,39 @@ A Websphere alapú alkalmazás a felsorolt problémákra az alábbi módon kín�
 \subsection{Architektúra tervezése}
 
 Mivel az alkalmazás egy projekt részeként valósult meg, így többen dolgoztunk rajta, ami különösen fontossá tette az architektúra átgondolását, és alapos megtervezését. 
+
+A cél egy olyan alkalmazás fejlesztése volt, ami mind a jövőbeni fejlesztők, mind az üzemeltetéssel foglalkozó személyzet számára könnyen használható. Jelen esetben a fejlesztők alatt elsősorban azokat a személyeket értem, akik majd későbbiekben új lekérdezés (query) típusokat készítenek a rendszerhez. Ezek a személyek mélyebb ismeretekkel rendelkeznek a rendszerrel kapcsolatban, ám fontos hogy számukra is egy könnyen használható interfészt biztosítsunk. Emellett fontos hogy az új lekérdezés típusok könnyen, az alkalmazás minimális, optimális esetben semmilyen, módosításával bevezethetők legyenek. Ezzel jól szétválasztható a fejlesztők és az üzemeltetők számára szükséges tudás, mivel egy már kész, új típust egy, a rendszer belső működéséhez kevésbé értő ember is gyorsan be tud vezetni. Üzemeltetői részről egy könnyen használható felület biztosítása volt a cél, ami egyértelmű tudósítást ad a rendszer állapotáról, és megkönnyíti az egyes lekérdezések helyes felparaméterezését.
+
+A tervezésnél az alábbi döntéseket hoztuk:
+
+\begin{itemize}
+	\item Egységes, moduláris lekérdezésrendszer
+	\begin{itemize}
+		\item A különböző lekérdezés típusok egy közös interfészt implementálnak.
+		\item Minden ténylegesen lefutó lekérdezés egy lekérdezés típusból, és annak a felparaméterezéséből áll. Ezeket egy táblában szerializálva tároljuk, ahonnan az ütemező felolvassa, és futtatja őket.
+	\end{itemize}
+	
+	\item Két külön ütemező, külön időzítéssel, egy az ISIM lekérésekhez, egy a QRadar szinkronizációhoz.
+	
+	\item Kétfázisú lekérdezések, több lehetséges állapottal \todo state diagram
+	\begin{itemize}
+		\item Minden lekérdezés két fázisból áll: egy ISIM irányú lekérési fázisból, és egy feltöltési fázisból a QRadar felé
+		\item A lekérdezés létrejöttekor egy kezdeti állapotban van.
+		\item Az ütemező elindítja a lekérdezést, ekkor IDM\_SYNC\_RUNNING állapotba kerül, és elkezd futni a definiált ISIM lekérdezés.
+		\item Ha a folyamat sikeres volt, IDM\_SYNC\_COMPLETED állapotba kerül, ha nem, akkor IDM\_FAILED-be
+		\item Az IDM\_SYNC\_COMPLETED állapot után a lekérdezés vár, amíg az ütemező el nem indítja a QRadar irányú szinkronizációt, vagy újra sorra nem kerül az ISIM ütemező számára.
+		\item A QRadar szinkronizáció futása ha sikeres, akkor COMPLETED állaptba kerül a lekérdezés. Ezt az állapotot nevezzük a sikeres végállapotnak.
+		\item Ha a QRadar szinkronizáció nem volt sikeres, akkor QRADAR\_SYNC\_FAILED állapotba kerül. Ekkor a lekérdezés vár, hogy a két ütemező közül valamelyik elindítsa az egyik feladatát.
+	\end{itemize}
+
+	\item Lekérdezések eredményeinek tárolása, delta számolás
+	\begin{itemize}
+		\item Egy lekérdezés futtatása közben, minden sikeresen lefuttatott fázis után szerializáljuk az eredményt egy SQL adatbázisba. Emiatt ha az alkalmazás hibára futna, vagy újraindulna két fázis között, a lekérdezés eredménye megmarad.
+		\item A QRadar-ra legutóbb feltöltött állapotról tárolunk egy lokális verziót, amit összehasonlítunk az ISIM lekérdezés eredményével. Ha változás történt, akkor csak a két állapot különbségét töltjük fel.
+		\item Ha a különbség feltöltése közben hibára futunk, feltételezhetjük hogy a rendszeren kívülről valaki módosítást hajtott végre, és a lokális változat már nincs szinkronban. Ekkor egy teljes feltöltést végzünk az adatokkal.
+	\end{itemize}
+\end{itemize}
+
 
 \section{Query-k implementációja} \label{sec:queryk}
 % Mod

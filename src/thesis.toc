@@ -13,12 +13,12 @@
 \select@language {magyar} \contentsline {chapter}{\numberline {3}Feladat megval\IeC {\'o}s\IeC {\'\i }t\IeC {\'a}sa}{10}{chapter.3}
 \select@language {magyar} \contentsline {section}{\numberline {3.1}Wrapper fejleszt\IeC {\'e}se QRadar-hoz}{10}{section.3.1}
 \select@language {magyar} \contentsline {section}{\numberline {3.2}TDI Integr\IeC {\'a}ci\IeC {\'o} megval\IeC {\'o}s\IeC {\'\i }t\IeC {\'a}sa}{12}{section.3.2}
-\select@language {magyar} \contentsline {subsection}{\numberline {3.2.1}QRadar connector fejleszt\IeC {\'e}se TDI-hoz}{12}{subsection.3.2.1}
+\select@language {magyar} \contentsline {subsection}{\numberline {3.2.1}QRadar connector fejleszt\IeC {\'e}se TD-Ihoz}{12}{subsection.3.2.1}
 \select@language {magyar} \contentsline {subsection}{\numberline {3.2.2}Connector tesztel\IeC {\'e}se}{14}{subsection.3.2.2}
 \select@language {magyar} \contentsline {section}{\numberline {3.3}WAS integr\IeC {\'a}ci\IeC {\'o} megval\IeC {\'o}s\IeC {\'\i }t\IeC {\'a}sa}{14}{section.3.3}
 \select@language {magyar} \contentsline {subsection}{\numberline {3.3.1}Architekt\IeC {\'u}ra tervez\IeC {\'e}se}{15}{subsection.3.3.1}
-\select@language {magyar} \contentsline {section}{\numberline {3.4}Query-k implement\IeC {\'a}ci\IeC {\'o}ja}{15}{section.3.4}
-\select@language {magyar} \contentsline {section}{\numberline {3.5}QRadar esem\IeC {\'e}ny k\IeC {\"u}ld\IeC {\H o} fejleszt\IeC {\'e}se}{16}{section.3.5}
-\select@language {magyar} \contentsline {subsection}{\numberline {3.5.1}TDI alap\IeC {\'u} syslog k\IeC {\"u}ld\IeC {\H o} fejleszt\IeC {\'e}se}{17}{subsection.3.5.1}
-\select@language {magyar} \contentsline {subsection}{\numberline {3.5.2}QRadar oldali esem\IeC {\'e}ny fogad\IeC {\'o} fejleszt\IeC {\'e}se}{18}{subsection.3.5.2}
-\select@language {magyar} \contentsline {chapter}{\numberline {4}\IeC {\"O}sszefoglal\IeC {\'a}s}{20}{chapter.4}
+\select@language {magyar} \contentsline {section}{\numberline {3.4}Query-k implement\IeC {\'a}ci\IeC {\'o}ja}{16}{section.3.4}
+\select@language {magyar} \contentsline {section}{\numberline {3.5}QRadar esem\IeC {\'e}ny k\IeC {\"u}ld\IeC {\H o} fejleszt\IeC {\'e}se}{17}{section.3.5}
+\select@language {magyar} \contentsline {subsection}{\numberline {3.5.1}TDI alap\IeC {\'u} syslog k\IeC {\"u}ld\IeC {\H o} fejleszt\IeC {\'e}se}{18}{subsection.3.5.1}
+\select@language {magyar} \contentsline {subsection}{\numberline {3.5.2}QRadar oldali esem\IeC {\'e}ny fogad\IeC {\'o} fejleszt\IeC {\'e}se}{19}{subsection.3.5.2}
+\select@language {magyar} \contentsline {chapter}{\numberline {4}\IeC {\"O}sszefoglal\IeC {\'a}s}{21}{chapter.4}
