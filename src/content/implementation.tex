@@ -125,7 +125,7 @@ A tervezésnél az alábbi döntéseket hoztuk:
 	
 	\item Két külön ütemező, külön időzítéssel, egy az ISIM lekérésekhez, egy a QRadar szinkronizációhoz.
 	
-	\item Kétfázisú lekérdezések, több lehetséges állapottal \todo state diagram
+	\item Kétfázisú lekérdezések, több lehetséges állapottal (Lsd.: \ref{fig:refloaderstates} Ábra)
 	\begin{itemize}
 		\item Minden lekérdezés két fázisból áll: egy ISIM irányú lekérési fázisból, és egy feltöltési fázisból a QRadar felé
 		\item A lekérdezés létrejöttekor egy kezdeti állapotban van.
@@ -143,6 +143,13 @@ A tervezésnél az alábbi döntéseket hoztuk:
 		\item Ha a különbség feltöltése közben hibára futunk, feltételezhetjük hogy a rendszeren kívülről valaki módosítást hajtott végre, és a lokális változat már nincs szinkronban. Ekkor egy teljes feltöltést végzünk az adatokkal.
 	\end{itemize}
 \end{itemize}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=0.9\linewidth]{figures/refloader_states}
+	\caption{Egy lekérdezés futásának állapotai}
+	\label{fig:refloaderstates}
+\end{figure}
 
 
 \section{Query-k implementációja} \label{sec:queryk}
