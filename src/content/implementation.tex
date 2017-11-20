@@ -83,9 +83,9 @@ Ennél a megoldásnál a cél egy robusztus alkalmazás megalkotása volt, ami j
 
 A TDI alapú megoldás fő limitációi:
 \begin{itemize}	
-	\item \todo A magas rendelkezésre állóság, elosztott futtatás, és az adatok naprakészségének biztosítása nehezen megoldható.
+	\item A magas rendelkezésre állóság, elosztott futtatás, és az adatok naprakészségének biztosítása nehezen megoldható.
 	
-	\item \todo Technikai és hozzáférési információk védelme és kezelése.
+	\item Technikai és hozzáférési információk védelme és kezelése.
 	
 	\item Fejlesztői és operátori / üzemeltetői feladatok nehezen választhatók szét.
 	
@@ -123,7 +123,7 @@ A tervezésnél az alábbi döntéseket hoztuk:
 		\item Minden ténylegesen lefutó lekérdezés egy lekérdezés típusból, és annak a felparaméterezéséből áll. Ezeket egy táblában szerializálva tároljuk, ahonnan az ütemező felolvassa, és futtatja őket.
 	\end{itemize}
 	
-	\item Két külön ütemező, külön időzítéssel, egy az ISIM lekérésekhez, egy a QRadar szinkronizációhoz.
+	\item Két ütemező, külön időzítéssel, egy az ISIM lekérésekhez, egy a QRadar szinkronizációhoz.
 	
 	\item Kétfázisú lekérdezések, több lehetséges állapottal (Lsd.: \ref{fig:refloaderstates} Ábra)
 	\begin{itemize}
@@ -132,7 +132,7 @@ A tervezésnél az alábbi döntéseket hoztuk:
 		\item Az ütemező elindítja a lekérdezést, ekkor IDM\_SYNC\_RUNNING állapotba kerül, és elkezd futni a definiált ISIM lekérdezés.
 		\item Ha a folyamat sikeres volt, IDM\_SYNC\_COMPLETED állapotba kerül, ha nem, akkor IDM\_FAILED-be
 		\item Az IDM\_SYNC\_COMPLETED állapot után a lekérdezés vár, amíg az ütemező el nem indítja a QRadar irányú szinkronizációt, vagy újra sorra nem kerül az ISIM ütemező számára.
-		\item A QRadar szinkronizáció futása ha sikeres, akkor COMPLETED állaptba kerül a lekérdezés. Ezt az állapotot nevezzük a sikeres végállapotnak.
+		\item A QRadar szinkronizáció futása ha sikeres, akkor COMPLETED állapotba kerül a lekérdezés. Ezt az állapotot nevezzük a sikeres végállapotnak.
 		\item Ha a QRadar szinkronizáció nem volt sikeres, akkor QRADAR\_SYNC\_FAILED állapotba kerül. Ekkor a lekérdezés vár, hogy a két ütemező közül valamelyik elindítsa az egyik feladatát.
 	\end{itemize}
 
@@ -141,6 +141,12 @@ A tervezésnél az alábbi döntéseket hoztuk:
 		\item Egy lekérdezés futtatása közben, minden sikeresen lefuttatott fázis után szerializáljuk az eredményt egy SQL adatbázisba. Emiatt ha az alkalmazás hibára futna, vagy újraindulna két fázis között, a lekérdezés eredménye megmarad.
 		\item A QRadar-ra legutóbb feltöltött állapotról tárolunk egy lokális verziót, amit összehasonlítunk az ISIM lekérdezés eredményével. Ha változás történt, akkor csak a két állapot különbségét töltjük fel.
 		\item Ha a különbség feltöltése közben hibára futunk, feltételezhetjük hogy a rendszeren kívülről valaki módosítást hajtott végre, és a lokális változat már nincs szinkronban. Ekkor egy teljes feltöltést végzünk az adatokkal.
+	\end{itemize}
+
+	\item Egyedi felhasználói felület fejlesztése
+	\begin{itemize}
+		\item Olyan felület, amelyen egyszerűen láthatók a rendszerben megtalálható, már felkonfigurált lekérdezések, valamit könnyen és gyorsan új lekérdezéseket konfigurálhatunk fel.
+		\item Lekérdezések létrehozásának könnyítése sémafelderítéssel, aminek a segítségével a rendszerben található service-ek, organizációs egységek, szerepkörök, stb... egy listából kiválaszthatók.
 	\end{itemize}
 \end{itemize}
 
