@@ -74,12 +74,12 @@ Végeredményképp létrehoztam a felvázolt működésnek megfelelő connector-
 A fejlesztés következő lépése az elkészített connector tesztelése volt, valamint a helyes működés ellenőrzése. Az ennek során szerzett tapasztalatokra építve készítettem el a \ref{sec:queryk}. \nameref{sec:queryk} fejezetben leírt query-ket.
 
 A teszteléshez kézzel megadtam néhány inputot, melyeket megkíséreltem feltölteni a connector segítségével egy Reference Data-ba, majd ezeket ellenőriztem a QRadar belső menüjének, valamint az API-jának használatával. 
-%INCLUDE képernyőképek a processről, mondjuk 2 kép, adatok beégetve, assembly line lefuttatve, majd képe a felkerült adatokról, törlés mod hasonlóan.
+%INCLUDE képernyőképek a processről, mondjuk 2 kép, adatok beégetve, assembly line lefuttatva, majd képe a felkerült adatokról, törlés mod hasonlóan.
 A hozzáadáson kívül ellenőriztem hogy a további műveletek, a törlés valamint a módosítás is működik e.
 % Mod
 \section{WAS integráció megvalósítása}
 
-Ennél a megoldásnál a cél egy robusztus alkalmazás megalkotása volt, ami jól illeszkedik egy nagyvállalati környezetbe, valamint működésileg és üzemeltetésileg is összhangban van a hozzá kapcsolódó IBM-es termékekkel. Az előző szekcióban ismeretett TDI alapú megoldás ugyan ellátja a szükséges feladatokat, a fejlesztés egyszerű és gyors, de a használt technológiából adódik, hogy más területeken hártányban van egy különálló, vagy akár egy menedszelt környezetben futtatott alkalmazással szemben. Ezeket a hátrányos tulajdonságokat hivatott áthidalni a Websphere alapú megoldás.
+Ennél a megoldásnál a cél egy robusztus alkalmazás megalkotása volt, ami jól illeszkedik egy nagyvállalati környezetbe, valamint működésileg és üzemeltetésileg is összhangban van a hozzá kapcsolódó IBM-es termékekkel. Az előző szekcióban ismeretett TDI alapú megoldás ugyan ellátja a szükséges feladatokat, a fejlesztés egyszerű és gyors, de a használt technológiából adódik, hogy más területeken hátrányban van egy különálló, vagy akár egy menedszelt környezetben futtatott alkalmazással szemben. Ezeket a hátrányos tulajdonságokat hivatott áthidalni a Websphere alapú megoldás.
 
 A TDI alapú megoldás fő limitációi:
 \begin{itemize}	
@@ -146,7 +146,7 @@ A tervezésnél az alábbi döntéseket hoztuk:
 	\item Egyedi felhasználói felület fejlesztése
 	\begin{itemize}
 		\item Olyan felület, amelyen egyszerűen láthatók a rendszerben megtalálható, már felkonfigurált lekérdezések, valamit könnyen és gyorsan új lekérdezéseket konfigurálhatunk fel.
-		\item Lekérdezések létrehozásának könnyítése sémafelderítéssel, aminek a segítségével a rendszerben található service-ek, organizációs egységek, szerepkörök, stb... egy listából kiválaszthatók.
+		\item Lekérdezések létrehozásának könnyítése sémafelderítéssel, aminek a segítségével a rendszerben található service-ek, organizációs egységek, szerepkörök, stb... listákból kiválaszthatók.
 	\end{itemize}
 \end{itemize}
 
@@ -172,13 +172,13 @@ A koncepció, valamint a fejlesztett megoldások tesztelésére az alábbi use-c
 	\item Inaktív felhasználókhoz tartozó fiókok
 	\begin{itemize}
 		\small
-		\item Felhasználása: A SIEM riasztást adhat ha olyan tevékenység történik, ami ezekhez a felhasználói fiókokhoz kapcsolódik. Ezek elsősorban akkor következhetnek be, vagy akkor jelenthetnek kockázatot, ha a felfüggesztés a felhasználó fiókjaira valamiért nem érvényesült, és képes használni. De fehasználható visszamenőleg is, irreguláris tevékenységek keresésére.
+		\item Felhasználása: A SIEM riasztást adhat ha olyan tevékenység történik, ami ezekhez a felhasználói fiókokhoz kapcsolódik. Ezek elsősorban akkor következhetnek be, vagy akkor jelenthetnek kockázatot, ha a felfüggesztés a felhasználó fiókjaira valamiért nem érvényesült, és képes használni. De felhasználható visszamenőleg is, irreguláris tevékenységek keresésére.
 		\item Megvalósítás: LDAP szűrés az összes inaktív felhasználóra, majd szűrés az összes fiókra, az alapján, hogy tulajdonosa e az egyik megtalált felhasználó e.
 	\end{itemize}
 	\item Felfüggesztési eljárás alatt álló felhasználók fiókjai
 	\begin{itemize}
 		\small
-		\item Felhasználása: A SIEM riasztást adhat ezen felhasználói fiókok detektálásakor. Biztonsági szempontból első sorban azért érdekes, mert a felfüggesztett személyeket általában okkal, és jogvesztéssel együtt függesztik fel (bírósági vizsgálat, kirúgás, stb), emiatt lehetésges hogy a felfüggesztés célpontja bosszúból valami ártalmas tevékenységet követ el.
+		\item Felhasználása: A SIEM riasztást adhat ezen felhasználói fiókok detektálásakor. Biztonsági szempontból első sorban azért érdekes, mert a felfüggesztett személyeket általában okkal, és jogvesztéssel együtt függesztik fel (bírósági vizsgálat, kirúgás, stb), emiatt lehetséges hogy a felfüggesztés célpontja bosszúból valami ártalmas tevékenységet követ el.
 		\item Megvalósítás: Adatbázis keresés a jelen pillanatban futó felfüggesztési folyamatokra, majd az ebből kinyert felhasználó azonosítója alapján LDAP szűrés az összes fiók között.
 	\end{itemize}
 	\item Törlési folyamat alatt álló felhasználói fiókok
@@ -191,7 +191,7 @@ A koncepció, valamint a fejlesztett megoldások tesztelésére az alábbi use-c
 	\begin{itemize}
 		\small
 		\item Felhasználása: Ezek olyan fiókok, melyek nem köthetők valós, a rendszerben kezelt személyhez. Ilyenek lehetnek például a rendszer által menedszelt technikai fiókok, vagy olyanok, amik korábban valós felhasználókhoz tartoztak, de valamiért megmaradtak a szétválás után is. Ezek komoly biztonsági rést jelenthetnek, elsősorban ha például hozzáférnek kritikus rendszerekhez, de megmaradt a alapértelmezett jelszavuk, vagy nem alkalmazták rájuk a jelszó házirendeket.
-		\item Megvalósítás: Mivel az ISIM az LDAP adatbázisában ezeket a fiókokat külön tárolja, elég ezt lekérnünk. Majd a kinyet adatok alapján hozzárendeljük őket a megfelelő service-hez, és annak a megfelelő azonosítójához.
+		\item Megvalósítás: Mivel az ISIM az LDAP adatbázisában ezeket a fiókokat külön tárolja, elég ezt lekérnünk. Majd a kinyert adatok alapján hozzárendeljük őket a megfelelő service-hez, és annak a megfelelő azonosítójához.
 	\end{itemize}
 	\item Egy menedzselt rendszeren a megadott csoportokba tartozó felhasználói fiókok
 	\begin{itemize}
@@ -211,7 +211,7 @@ A folyamatokkal kapcsolatos információkat az ISIM a saját DB2 adatbázisában
 A felsorolt táblákból kinyerhetők a folyamattal kapcsolatos technikai információk, mint a folyamat típusa, kezdeti ideje, általa hivatkozott egyéb folyamatok és activity-k. Emellett viszont olyan adatokat is tárolnak a táblák, amik a folyamatban résztvevő személyeket azonosítják. Ha ezeket az adatokat képes feldolgozni a QRadar oldali esemény fogadó, akkor az előzőekben ismertetett megoldás által feltöltött adatok segítségével kialakíthatók olyan szabályok, amik fontos incidenseket detektálhatnak.
  
 \subsection{TDI alapú syslog küldő fejlesztése}
-Az ISIM-ben található adatok feldolgozására, és ezekből syslog események generálására a már az előzőekben bemtatott TDI keretrendszert használtam. Ez kézenfekvőnek tűnt, mivel a TDI biztosít connectorokat mind az ISIM DB2 adatbázisa irányába, mind a syslog események generálásához és küldéséhez. Előbbire a Java JDBC protokollt használó JDBC connector-t, utóbbira a beépített Log connector-t, ami sok különböző standard logoló motor mellett a syslog-ot is támogatja. 
+Az ISIM-ben található adatok feldolgozására, és ezekből syslog események generálására a már az előzőekben bemutatott TDI keretrendszert használtam. Ez kézenfekvőnek tűnt, mivel a TDI biztosít connectorokat mind az ISIM DB2 adatbázisa irányába, mind a syslog események generálásához és küldéséhez. Előbbire a Java JDBC protokollt használó JDBC connector-t, utóbbira a beépített Log connector-t, ami sok különböző standard logoló motor mellett a syslog-ot is támogatja. 
 
 A fejlesztés első lépése a táblák és a bennük található adatok felmérése volt. Ez alapján az alábbi következtetésekre jutottam:
 
@@ -220,7 +220,7 @@ A fejlesztés első lépése a táblák és a bennük található adatok felmér
 	\begin{itemize}
 		\item A legfontosabb információk itt találhatók, többek közt: folyamat indítója; folyamat alanya; organizációs egység, amelyben fut; folyamat típusa és eredménye; indulási és befejezési időpont
 	\end{itemize}
-	\item Az Activity a .....-t, 
+	\item Az ACTIVITY tábla sorai az egyes folyamatokhoz tartozó elemi akciók információit tartalmazza.
 	\item A PROCESSLOG tábla a folyamat egyes lépéseinek a kiegészítő és audit információit tartalmazza.
 	\item A három tábla közül a PROCESSLOG tábla tartalmazza az legkisebb felbontásban az folyamattal kapcsolatos információkat.
 	\item A folyamatban résztvevő felhasználókkal kapcsolatos legfontosabb adatok a PROCESS táblában találhatók.
@@ -242,7 +242,7 @@ A következő lépés az adatok átalakítása volt a QRadar számára könnyen 
 %RÖVIDTÁBLANÉV\_OSZLOPNÉV=ÉRTÉK;RÖVIDTÁBLANÉV\_OSZLOPNÉV=ÉRTÉK;RÖVIDTÁBLANÉV\_OSZLOPNÉV=ÉRTÉK;...
 
 
-A generálás utolsó lépése a sorok felküldése volt syslog protokollon keresztül a QRadar megfelelő fogadó interfészére. Ehhez a beépített Log connector-t használtam, egy egyedileg configurált Log4J logger segítségével. Az egyedi konfiguráció definiálja, hogy a beépített syslog logger legyen a használt logolási mód, milyen IP-re és portra küldjük az üzeneteket, valamint milyen formátumban.
+A generálás utolsó lépése a sorok felküldése volt syslog protokollon keresztül a QRadar megfelelő fogadó interfészére. Ehhez a beépített Log connector-t használtam, egy egyedileg konfigurált Log4J logger segítségével. Az egyedi konfiguráció definiálja, hogy a beépített syslog logger legyen a használt logolási mód, milyen IP-re és portra küldjük az üzeneteket, valamint milyen formátumban.
 
 A Log4J által biztosított syslog logger azonban alapértelmezetten nem volt megfelelő erre a célra, mivel úgy implementálták azt, hogy az 1019 byte-nál hosszabb üzeneteket tördelje megfelelő méretűvé, és több részben küldje tovább. Ez a QRadar oldalán azt okozta, hogy a logsor tördelékek külön eseményenként kerültek rögzítésre, ami nem volt megfelelő a kívánt működés szempontjából. A QRadar azonban biztosít egy megoldást a töredékek kezelésére: az UDP multiline syslog\footnote{ \href{https://www.ibm.com/support/knowledgecenter/SS42VS_7.2.2/com.ibm.qradar.doc_7.2.2/t_logsource_UDPmultiprotocol.html}{UDP multiline syslog dokumentáció}} kezelést, amihez a töredék üzeneteket ki kellett egészítenem azonosítókkal.
 
@@ -255,7 +255,7 @@ A szükséges egyedi azonosítókat szintén TDI-ban generálom. Mivel nem kript
 
 Ezek után a QRadar oldali fogadást kellett biztosítanom. Ezt a már említett UDP multiline syslog segítségével tettem. Ezt egy eseményforrás felkonfigurálásánál kell megadni, és annyiban különbözik az átlagos syslog protokollon érkező üzenetektől, hogy az 514-es port helyett az 517-est használja, valamint a beérkező üzeneteknek rendelkeznie kell egy azonosítóval. Ha az azonosító két vagy több üzenetben megegyezik, akkor azokat a QRadar összefűzi egy eseménnyé.
 
-Ezek alapján felkonfiguráltam egy új eseményforrást IBM Identity Manager néven, ami UDP multiline syslog-okat fogad. Ezek azonosításáhor egy \textit{msg\_uuid} mezőt keres, az alábbi regex segítségével: 
+Ezek alapján felkonfiguráltam egy új eseményforrást IBM Identity Manager néven, ami UDP multiline syslog-okat fogad. Ezek azonosításához egy \textit{msg\_uuid} mezőt keres, az alábbi regex segítségével: 
 
 \begin{lstlisting}
 msg_uuid=(.*?[^\\]);
