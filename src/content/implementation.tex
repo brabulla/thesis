@@ -75,12 +75,38 @@ Végeredményképp létrehoztam a felvázolt működésnek megfelelő connector-
 
 \subsection{Connector tesztelése}
 %concept, legyen ilyen fejezet? kell ide?
-A fejlesztés következő lépése az elkészített connector tesztelése volt, valamint a helyes működés ellenőrzése. Az ennek során szerzett tapasztalatokra építve készítettem el a \ref{sec:queryk}. \nameref{sec:queryk} fejezetben leírt query-ket.
+A fejlesztés következő lépése az elkészített connector tesztelése volt, valamint a helyes működés ellenőrzése. Az ennek során szerzett tapasztalatokra építve készítettem el a \ref{sec:queryk}. \nameref{sec:queryk} fejezetben leírt integrációs feladatokat.
 
-A teszteléshez kézzel megadtam néhány inputot, melyeket megkíséreltem feltölteni a connector segítségével egy Reference Data-ba, majd ezeket ellenőriztem a QRadar belső menüjének, valamint az API-jának használatával. 
-%INCLUDE képernyőképek a processről, mondjuk 2 kép, adatok beégetve, assembly line lefuttatva, majd képe a felkerült adatokról, törlés mod hasonlóan.
-A hozzáadáson kívül ellenőriztem hogy a további műveletek, a törlés valamint a módosítás is működik e.
-% Mod
+A teszteléshez kézzel megadtam néhány inputot, melyeket megkíséreltem feltölteni a connector segítségével egy Reference Data-ba, majd ezeket ellenőriztem a QRadar belső menüjének használatával.
+ A  \ref{fig:conntest1}-es Ábrán látható, hogy egy Javascript blokk formájában feltöltöm az assembly line fő változójának értékét egyedileg definiált szövegekkel. A bal oldalon látható a teszt Assembly line, ami a feltöltő script-ből áll, a QRadar Connectorból, valamint egy ciklus vezérlőből, ami az összes string értéket egyesével továbbítja a QRadar Connector felé. A  \ref{fig:conntest2} Ábrán látható a QRadar Connector felkonfigurálása.
+ 
+ Az assembly line futtatása után, a folyamat eredményességét a QRadar Reference Set módosító felületén keresztül ellenőriztem. Az eredmény a \ref{fig:qradartest1} Ábrán látható. %Látszik, hogy az összes kézzel definiált szöveg felkerült az adott set-be. A
+
+\begin{figure}[b]
+	\centering
+	\begin{minipage}{0.45\textwidth}
+		\includegraphics[width=0.9\linewidth]{figures/conn_test/connTest1}
+		\caption{Adatok kézi megadása}
+		\label{fig:conntest1}
+	\end{minipage}
+	\begin{minipage}{0.45\textwidth}
+		\includegraphics[width=0.9\linewidth]{figures/conn_test/connTest2}
+		\caption{Connector konfigurációja}
+		\label{fig:conntest2}
+	\end{minipage}
+
+\end{figure}
+\begin{figure}
+	\centering
+	\includegraphics[width=0.9\linewidth]{figures/conn_test/qradarTest1}
+	\caption{Feltöltött adatok}
+	\label{fig:qradartest1}
+\end{figure}
+A hozzáadáson kívül ellenőriztem a connector további műveleteit is: a törlést, a módosítást, az iterációt és a deltát.
+\todo függelék képernyőképek a többi módról?
+
+
+
 \section{WAS integráció megvalósítása}
 
 Ennél a megoldásnál a cél egy robusztus alkalmazás megalkotása volt, ami jól illeszkedik egy nagyvállalati környezetbe, valamint működés és üzemeltetés szempontjából is összhangban van a hozzá kapcsolódó IBM-es termékekkel. Az előző szekcióban ismeretett TDI alapú megoldás ugyan ellátja a szükséges feladatokat, a fejlesztés egyszerű és gyors, de a használt technológiából adódik, hogy más területeken hátrányban van egy különálló, vagy akár egy menedszelt környezetben futtatott alkalmazással szemben. Ezeket a hátrányos tulajdonságokat hivatott áthidalni a Websphere alapú megoldás.
