@@ -34,85 +34,69 @@ Magának a HTTP forgalomnak és a REST hívásoknak a lebonyolítására az Apac
 A wrapper a különböző reference data-k transzparens kezelésén túl egyéb funkciókat is ellát, mint például segéd funkciók biztosítása, vagy a hibák egységes kezelése. Ilyen segéd funkciók a különböző adattranszformációk a használt típusok és a JSON formátum között, vagy például különböző ellenőrzések egy reference data létezésére, vagy egy aszinkron törlés lefutására. A hibakezelés menedzselésére a wrapper egy saját kivétel osztályt definiál, ami minden, a sikeres lefutástól eltérő esetben (akár belső hiba, akár a QRadarral való kommunikáció közben fellépő hiba) eldobásra kerül. Ez az objektum tartalmaz egy szöveges üzenetet, ami a hiba okára utal, valamint egy státusz kódot, ami ha HTTP kommunikáció közbeni hiba történt, annak a kódját tartalmazza, ha belső működésbeli hiba (például parse-olási hiba) akkor egy 0-nál kisebb számot tartalmaz. Ez egységesen és könnyen használhatóvá teszi a felsőbb rétegek számára, ahol például logolást kezeljük, mert egyértelmű, hogy a hiba milyen forrásból adódott. A saját kivétel típus pedig tovább könnyíti a hibák elválasztását, főleg ha a wrapper-t egy nagyobb framework-ben használjuk.
 
 \section{TDI Integráció megvalósítása}
+% Mod
+A TDI alapú megoldás célja egy olyan keret, és hozzá tartozó use case-ek kidolgozása, amely lehetőséget ad az ISIM és QRadar közti integrációs feladatok gyors, hatékony és egyszerű megvalósítására. 
+A TDI már létező LDAP és adatbázis (JDBC) connectorral rendelkezik, ezért az ISIM adatforrásként való használata gyári komponensekkel oldható meg. A QRadar API használatához viszont új connector fejlesztésére volt szükség.
+Mivel a TDI által nyújtott keretrendszerbe illeszkedik a megoldás, így képes használni az általa nyújtott számos lehetőséget, például a már létező connector-okat sokféle rendszerhez, valamint a use case implementációk alapján később könnyedén készíthetők új megoldások olyanok által, akik járatosak a TDI használatában. 
 
-A TDI alapú megoldás célja egy olyan keret, és hozzá tartozó proof of concept use case-ek kidolgozása, amely lehetőséget ad az ISIM és QRadar közti integrációs feladatok gyors, hatékony és egyszerű megvalósítására. Mivel a TDI által nyújtott keretrendszerbe illeszkedik a megoldás, így képes használni az általa nyújtott számos lehetőséget, például a már létező connector-okat sokféle rendszerhez, valamint a use case implementációk alapján később könnyedén készíthetők új megoldások olyanok által, akik járatosak a TDI használatában. 
-
-A megvalósításhoz szükség volt elsősorban egy connector létrehozására, majd ezt felhasználva implementáltam néhány tényleges megoldást, általunk, valamint az ügyfél által definiált esetekre.
-
+A megvalósításhoz szükség volt elsősorban egy connector létrehozására, majd ezt felhasználva implementáltam több lekérdezés típust, általunk, valamint az ügyfél által definiált esetekre.
+% Mod
+ 
 \subsection{QRadar connector fejlesztése TDI-hoz}
 
-A projekt következő lépése a connector fejlesztése volt a TDI és a QRadar közti integrációhoz. Ehhez segítségemre volt a hivatalos útmutató connector fejlesztéshez, ami az IBM oldalán megtalálható. Egy saját connector fejlesztése TDI alatt abból áll, hogy létrehozunk egy új Java osztályt ami implementálja a megfelelő, TDI által specifikált interfészt, ennek metódusain belül elkészítjük a kívánt üzleti logikát, majd egy xml leíró fájllal együtt, a megfelelő struktúrában becsomagoljuk azt egy JAR fájlba, amit a TDI által használt könyvtárak egyikébe másolunk. 
+A TDI alapú megoldás első lépése egy connector fejlesztése volt a TDI és a QRadar közti integrációhoz. Ehhez segítségemre volt a hivatalos útmutató connector fejlesztéshez, ami az IBM oldalán megtalálható. Egy saját connector fejlesztése TDI alatt abból áll, hogy létrehozunk egy új Java osztályt ami implementálja a megfelelő, TDI által specifikált interfészt, ennek metódusain belül elkészítjük a kívánt üzleti logikát, majd egy xml leíró fájllal együtt, a megfelelő struktúrában becsomagoljuk azt egy JAR fájlba, amit a TDI által használt könyvtárak egyikébe másolunk. 
 
-Alapvetően hat működési módja lehet egy connector-nak, amit a feljebb említett dokumentum specifikál. Ezek a következők:
+Egy connector-nak hat működési módja lehet, amit a feljebb említett dokumentum specifikál. Ezek a következők:
+
 
 \begin{itemize}
 	\item Iterator - Végigiterál az adatforrás elemein, azokat felolvassa, és az assembly line rendelkezésére bocsájtja.
 	\item AddOnly - Az assembly line-on érkező adatokat hozzáadja az adatforráshoz.
-	\item Lookup - Lehetőséget ad több adatforrás elemeinek illesztésére. Úgynevezett link criteria megadásával az erre illeszkedő elemeket választja ki.
-	\item Delete - Az assembly line-ról kapott összes elem esetén a megadott link criteria-t felhasználva megpróbálja megkeresni az elemet, és ha megtalálta, törli azt. Lehetőség van olyan felparaméterezésre is, amely egyszerre több elemet töröl.
-	\item Update - Már meglévő adatok módosítását végzi. Előbb megpróbálja megkeresni a link criteria-val megadott rekordokat, ha talált ilyen elemet, akkor összehasonlítja az assembly line-on érkező elemmel, és elvégzi a szükséges módosításokat. Ha nem talált megfelelő elemet, akkor hozzáadja újként.
-	\item Delta - Egy különleges mód, melyhez szükség van további, ilyen módot támogató elemekre az assembly line-on. A felolvasott adatokat összehasonlítja egy külső tárolóban (ún. delta store) tárolt elemekkel, és a két elem differenciáiból delta műveleteket képez, amiket végrehajt a célrendszeren. Lényegében eltárolja a kezelt elemek legutóbb használt verzióját, és csak az újonnan beolvasott elemekhez képesti különbséget hajtja végre.
+	\item Lookup - Egy kritérium alapján keresést hajt végre az adatforráson és kiválasztja a kritériumra illeszkedő elemet vagy elemeket. Jellemzően több adatforrás elemeinek illesztésére használatos.
+	\item Delete - Az assembly line-ról kapott összes elem esetén a megadott kritériumot felhasználva megkeresi az elemet, és ha megtalálta, törli azt. Lehetőség van olyan felparaméterezésre is, amely egyszerre több elemet töröl.
+	\item Update - Már meglévő adatok módosítását végzi. Előbb  megkeresi a megadott kriétérium alapján a rekordokat, ha talált ilyen elemet, akkor összehasonlítja az assembly line-on érkező elemmel, és elvégzi a szükséges módosításokat. Ha nem talált megfelelő elemet, akkor hozzáadja újként.
+	\item Delta - Egy különleges mód, melyhez szükség van további, ilyen módot támogató elemekre az assembly line-on. A felolvasott adatokat összehasonlítja egy külső tárolóban (ún. delta store) tárolt elemekkel, és a két elem differenciáiból delta műveleteket képez, amiket végrehajt a célrendszeren. Eltárolja a kezelt elemek legutóbb használt verzióját, és csak az újonnan beolvasott elemekhez képesti különbséget hajtja végre.
 \end{itemize}
 
-Ezek a módok meghatározzák, hogy a fejlesztendő connector-nak milyen metódusokat muszáj implementálnia a megfelelő működéshez. Például az AddOnly mód csak az Initialize, putEntry, és a terminate metódusokat használja, így ha a connector csak ezt akarja használni, elég ezeket implementálni. Ezzel szemben például az Update mód ezeken felül használja a findEntry, és a modEntry metódust is. Minden connector a saját logikáját definiálja, amivel megvalósítja az adott célrendszeren az absztrakt módon megfogalmazott műveletet. Egy JDBC connector például adatbázis parancsokkal valósítja meg a fent definiált műveleteket egy kapcsolaton keresztül. Jelen esetben egy REST API-n keresztül elérhető a kommunikáció a célrendszerrel, így a connector szabványos HTTP kéréseket használ. A fejlesztés során megvalósításra került az összes fent említett mód.
+Egy connector nem feltétlenül támogat minden módot, a támogatni kívánt módok határozzák meg, hogy a fejlesztendő connector-nak milyen metódusokat kell implementálnia a megfelelő működéshez. 
+Például az AddOnly mód csak az Initialize, putEntry, és a terminate metódusokat használja, így ha a connector csak ezt akarja használni, elég ezeket implementálni. Ezzel szemben például az Update mód ezeken felül használja a findEntry, és a modEntry metódust is. Minden connector a saját logikáját definiálja, amivel megvalósítja az adott célrendszeren az absztrakt módon megfogalmazott műveletet. Egy JDBC connector például adatbázis parancsokkal valósítja meg a fent definiált műveleteket egy kapcsolaton keresztül. Jelen esetben egy REST API-n keresztül elérhető a kommunikáció a célrendszerrel, így a connector szabványos HTTP kéréseket használ. A fejlesztés során megvalósításra került az összes fent említett mód.
 
+% Mod
 Első lépésként tehát elkészítettem egy QRadarReferenceDataConnector osztályt, ami örököl egy generikus ősosztályból, ami már előre megvalósít olyan metódusokat a TDI által használt ConnectorInterface-en, amelyek nem kifejezetten connector specifikusak, hanem generikus feladatokat látnak el, például konfigurációs fájlok beolvasása vagy paraméterek beállítása.
+% Mod
 
 Az implementációs döntések megértéséhez fontos ismerni egy connector életciklusát. A connector létrejöttekor meghívódik a konstruktora, de ez a dokumentációban leírtaknak megfelelően nem szabad hogy paraméter és egyéb beállításokat tartalmazzon, mert a példány már létrejöhet az előtt, hogy a szükséges paraméterek beolvasásra kerültek. Ez azért történhet meg, mert ezt a konstruktort használja a TDI grafikus felülete a kezdeti beállítási és paraméterezési felület elkészítéséhez. A konfiguráló, valamint az erőforrás foglaló műveletek ezért az Initialize metódusban kaptak helyet, ami az assembly line futás elején hívódik meg. A connector objektum egészen az assembly line végéig életben marad, majd annak végén mielőtt a destruktor meghívódna, lefut az objektum terminate metódusa. Erre azért van szükség, hogy a connector megfelelően felszabadíthassa az általa foglalt erőforrásokat.
 
 A connector életciklus ismeretében, valamint a QRadar és a REST API-jának működése és telejsítménye miatt az alábbi megoldás mellett döntöttünk: az assembly line futása közben nem azonnal kerülnek fel az adatok a QRadar megfelelő reference data-jába, hanem azok először a connector egy változójában akkumulálódnak, és az életciklus végén, a terminate metódus segítségével kommitálódnak. Két ilyen változót használtam, egyet a törlendő, egyet az újonnan hozzáadandó elemek tárolására. A megvalósítás valamint a wrapper használata miatt adott volt, hogy ezeknek az akkumulátor változóknak a megvalósítását a QRadarApiWrapper mellé fejlesztett ReferenceData osztály, valamint leszármazottjai szolgáltassák.
 
 A connector használatához szükséges annak megfelelő felparaméterezése. Erre a TDI a grafikus fejlesztői felületén ad lehetőséget, ahol a connector által definiált paraméterek megadására beviteli mezők állnak rendelkezésre. Minden connectornak más paraméterekre van szüksége, ezt egy tdi.xml fájl megadásával írhatjuk le, amit a connector osztályt tartalmazó JAR fájlba csomagolunk be. Ezeket aztán a GUI segítségével megadhatjuk kézzel, paraméter fájl használatával, Javascript kóddal vagy helyettesítéssel, ami akár az aktuális entitás értékeit is felhasználhatja. A QRadar connector működéséhez legalább a QRadar példány elérhetőségét, a hozzá tartozó token-t, a reference data nevét, típusát, valamint az általa használt adat típusát meg kell adni.
-
+% Mod
 Végeredményképp létrehoztam a felvázolt működésnek megfelelő connector-t, ami képes a paraméterezés alapján megadott QRadar példánnyal felvenni a kapcsolatot, számára adatot feltölteni, módosítani, törölni. Ez bármilyen assembly line-ban használható, későbbi projektek során is.
 
 \subsection{Connector tesztelése}
 %concept, legyen ilyen fejezet? kell ide?
 A fejlesztés következő lépése az elkészített connector tesztelése volt, valamint a helyes működés ellenőrzése. Az ennek során szerzett tapasztalatokra építve készítettem el a \ref{sec:queryk}. \nameref{sec:queryk} fejezetben leírt query-ket.
 
-A teszteléshez kézzel megadtam néhány inputot (\ref{fig:conntest1} Ábra), melyeket megkíséreltem feltölteni a connector segítségével egy Reference Data-ba (\ref{fig:conntest2} Ábra), majd ezeket ellenőriztem a QRadar belső menüjének használatával (\ref{fig:qradartest1} Ábra). 
-
-\begin{figure}
-	\centering
-	\begin{minipage}{0.45\textwidth}
-		\includegraphics[width=0.9\linewidth]{figures/conn_test/connTest1}
-		\caption{Adatok kézi megadása}
-		\label{fig:conntest1}
-	\end{minipage}
-	\begin{minipage}{0.45\textwidth}
-		\includegraphics[width=0.9\linewidth]{figures/conn_test/connTest2}
-		\caption{Connector konfigurációja}
-		\label{fig:conntest2}
-	\end{minipage}
-
-\end{figure}
-\begin{figure}
-	\centering
-	\includegraphics[width=0.9\linewidth]{figures/conn_test/qradarTest1}
-	\caption{Feltöltött adatok}
-	\label{fig:qradartest1}
-\end{figure}
+A teszteléshez kézzel megadtam néhány inputot, melyeket megkíséreltem feltölteni a connector segítségével egy Reference Data-ba, majd ezeket ellenőriztem a QRadar belső menüjének, valamint az API-jának használatával. 
+%INCLUDE képernyőképek a processről, mondjuk 2 kép, adatok beégetve, assembly line lefuttatva, majd képe a felkerült adatokról, törlés mod hasonlóan.
 A hozzáadáson kívül ellenőriztem hogy a további műveletek, a törlés valamint a módosítás is működik e.
-
+% Mod
 \section{WAS integráció megvalósítása}
 
-Ennél a megoldásnál a cél egy robusztus alkalmazás megalkotása volt, ami jól illeszkedik egy nagyvállalati környezetbe, valamint működésileg és üzemeltetésileg is összhangban van a hozzá kapcsolódó IBM-es termékekkel. Az előző szekcióban ismeretett TDI alapú megoldás ugyan ellátja a szükséges feladatokat, a fejlesztés egyszerű és gyors, de a használt technológiából adódik, hogy más területeken hátrányban van egy különálló, vagy akár egy menedszelt környezetben futtatott alkalmazással szemben. Ezeket a hátrányos tulajdonságokat hivatott áthidalni a Websphere alapú megoldás.
+Ennél a megoldásnál a cél egy robusztus alkalmazás megalkotása volt, ami jól illeszkedik egy nagyvállalati környezetbe, valamint működés és üzemeltetés szempontjából is összhangban van a hozzá kapcsolódó IBM-es termékekkel. Az előző szekcióban ismeretett TDI alapú megoldás ugyan ellátja a szükséges feladatokat, a fejlesztés egyszerű és gyors, de a használt technológiából adódik, hogy más területeken hátrányban van egy különálló, vagy akár egy menedszelt környezetben futtatott alkalmazással szemben. Ezeket a hátrányos tulajdonságokat hivatott áthidalni a Websphere alapú megoldás.
 
-A TDI alapú megoldás fő limitációi:
+A WebSphere alapú alkalmazás fejlesztésének főbb motivációi:
 \begin{itemize}	
-	\item A magas rendelkezésre állóság, elosztott futtatás, és az adatok naprakészségének biztosítása nehezen megoldható.
-	
-	\item Technikai és hozzáférési információk védelme és kezelése.
-	
-	\item Fejlesztői és operátori / üzemeltetői feladatok nehezen választhatók szét.
-	
+	\item A magas rendelkezésre állás, elosztott futtatás, egységes alkalmazásmenedzsment biztosítása.	
+	\item Jogosultságkezelés és auditálhatóság megvalósítása. 
+	\item Fejlesztői és üzemeltetői feladatok szétválasztása, valamint az üzemeltetési feladatok felhasználói felülettel való támogatása.
 \end{itemize}
 
-A felsorolt problémák egy része valamilyen külső megoldást kíván, ami növeli az alkalmazás beállítási és karbantartási komplexitását, mivel ezekre is figyelmet kell fordítanunk, ezeket is ellenőriznünk kell esetleges hibák felmerülésekor. További probléma, hogy a TDI alapú megoldás testre szabhatósága bizonyos kereteken túl nem, vagy nagyon nehezen megvalósítható. Ilyen például a felhasználói felület kérdése. A TDI alapú megoldásnál adottak az opciók: a Configuration Editor, azaz a fejlesztői alkalmazás használata, vagy a megfelelő parancssoros lehetőségek használata. Ha saját felületet akarunk készíteni, akkor nem csak annak a fejlesztését kell megvalósítanunk, de a TDI által biztosított interfészekkel való kommunikációt is. Ezzel szemben egy saját alkalmazás, menedzselt környezetben futtatva, az adott alkalmazásszerver által nyújtott lehetőségekkel együtt, a legtöbb felsorolt problémára megoldást nyújthat. 
+A felsorolt funkciók TDI-vel történő megvalósítása valamilyen külső megoldást kívánna, ami növelné az alkalmazás beállítási és karbantartási komplexitását, mivel ezekre is figyelmet kell fordítanunk, ezeket is ellenőriznünk kellene esetleges hibák felmerülésekor. További probléma, hogy a TDI alapú megoldás testre szabhatósága bizonyos kereteken túl nem, vagy nagyon nehezen megvalósítható. Ilyen például a felhasználói felület kérdése. A TDI alapú megoldásnál adottak az opciók: a Configuration Editor, azaz a fejlesztői alkalmazás használata, vagy a megfelelő parancssoros lehetőségek használata. Ha saját felületet akarunk készíteni, akkor nem csak annak a fejlesztését kell megvalósítanunk, de a TDI által biztosított interfészekkel való kommunikációt is. Ezzel szemben egy saját alkalmazás, menedzselt környezetben futtatva, az adott alkalmazásszerver által nyújtott lehetőségekkel együtt, a legtöbb felsorolt problémára megoldást nyújthat. 
 
 %Az automatizált futtatást biztosítja a szerver által nyújtott ütemező, a naprakészséget és a magas rendelkezésre állóságot a szerver architektúrája és infrastruktúrája. Emellett megvalósíthatunk egyedi megoldásokat is, mint például egy egyedi logikát, ami biztosítja az elakadó szinkronizációs feladatok és az inkonzisztenciák korrigálását. A technikai és hozzáférési információkat, valamint az elosztott futtatást szintén nem kell alkalmazás szinten kezelnünk, mert a szerver tárolhatja a cache-elhető információkat és erőforrásokat, akár egy poolozott megoldással, amiket szükség esetén az alkalmazás rendelkezésére bocsájt, akár elosztottan, több példány számára is. 
 
-A Websphere alapú alkalmazás a felsorolt problémákra az alábbi módon kínál megoldást
+A Websphere alapú alkalmazás a fenti területkre az alábbi módon kínál megoldást:
 \begin{itemize}
 	\item Futtatásra használhatjuk a WebSphere által kínált beépített ütemezőt, ami az általunk megadott szabályok szerint végrehajtja a feladatokat.
 	
@@ -127,9 +111,9 @@ A Websphere alapú alkalmazás a felsorolt problémákra az alábbi módon kín�
 \todo UML diagramok?
 \subsection{Architektúra tervezése}
 
-Mivel az alkalmazás egy projekt részeként valósult meg, így többen dolgoztunk rajta, ami különösen fontossá tette az architektúra átgondolását, és alapos megtervezését. 
+Mivel az alkalmazás egy projekt részeként valósult meg, többen dolgoztunk rajta, ez különösen fontossá tette az architektúra átgondolását és alapos megtervezését. 
 
-A cél egy olyan alkalmazás fejlesztése volt, ami mind a jövőbeni fejlesztők, mind az üzemeltetéssel foglalkozó személyzet számára könnyen használható. Jelen esetben a fejlesztők alatt elsősorban azokat a személyeket értem, akik majd későbbiekben új lekérdezés (query) típusokat készítenek a rendszerhez. Ezek a személyek mélyebb ismeretekkel rendelkeznek a rendszerrel kapcsolatban, ám fontos hogy számukra is egy könnyen használható interfészt biztosítsunk. Emellett fontos hogy az új lekérdezés típusok könnyen, az alkalmazás minimális, optimális esetben semmilyen, módosításával bevezethetők legyenek. Ezzel jól szétválasztható a fejlesztők és az üzemeltetők számára szükséges tudás, mivel egy már kész, új típust egy, a rendszer belső működéséhez kevésbé értő ember is gyorsan be tud vezetni. Üzemeltetői részről egy könnyen használható felület biztosítása volt a cél, ami egyértelmű tudósítást ad a rendszer állapotáról, és megkönnyíti az egyes lekérdezések helyes felparaméterezését.
+A cél egy olyan alkalmazás fejlesztése volt, ami mind a jövőbeni fejlesztők, mind az üzemeltetéssel foglalkozó személyzet számára könnyen használható. Jelen esetben a fejlesztők alatt elsősorban azokat a személyeket értem, akik majd későbbiekben új lekérdezés (query) típusokat készítenek a rendszerhez. Ezek a személyek mélyebb ismeretekkel rendelkeznek a rendszerrel kapcsolatban, ám fontos, hogy számukra is egy könnyen használható interfészt biztosítsunk. Emellett fontos, hogy az új lekérdezés típusok könnyen, az alkalmazás minimális -- vagy optimális esetben semmilyen -- módosításával bevezethetők legyenek. Ezzel jól szétválasztható a fejlesztők és az üzemeltetők számára szükséges tudás, mivel egy már kész, új típust egy, a rendszer belső működéséhez kevésbé értő ember is gyorsan be tud vezetni. Üzemeltetői részről egy könnyen használható felület biztosítása volt a cél, ami egyértelmű tudósítást ad a rendszer állapotáról, és megkönnyíti új lekérdezések konfigurálását, azok helyes felparaméterezését.
 
 A tervezésnél az alábbi döntéseket hoztuk:
 
@@ -174,12 +158,9 @@ A tervezésnél az alábbi döntéseket hoztuk:
 	\label{fig:refloaderstates}
 \end{figure}
 
-\subsection{Megvalósított alkalmazás}
-
-A végső alkalmazás egy Java webalkalmazás formájában valósult meg. 
 
 \section{Query-k implementációja} \label{sec:queryk}
-
+% Mod
 A koncepció, valamint a fejlesztett megoldások tesztelésére az alábbi use-case-eket definiáltuk:
 
 \begin{itemize}
@@ -290,4 +271,3 @@ Ezután a QRadar-t kellett felkészítenem az események kezelésére. Ehhez lé
 Ennél a reguláris kifejezésnél az attribútum értéke pontosan az első találati csoportban érhető el, valamint a felépítése miatt megfelelően kezeli az \todo eszképelt pontosvesszőket is.
 
 \todo Screenshot előtte, utána\\
-%Screenshot kell e? ha igen, akkor 2017.11.21 15:24 és 15:55 közötti eseményeknél van különöböző EventID mappelésű
