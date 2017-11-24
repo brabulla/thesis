@@ -58,7 +58,7 @@ A dolgozat célja ezen alkalmazotti és a hozzájuk kapcsolódó életciklus inf
 
 \section{A feladat specifikálása}
 
-Jelen dolgozat feladata egy olyan megoldás fejlesztése, mely lehetővé teszi a fent említett technológiák közti integrációt és az adatszinkronizációt. Az integrációt a IBM által kínált IdM (IBM Security Identity Manager - ISIM\footnote{Lásd \ref{subsec:ISIM}}) és SIEM (IBM Security QRadar SIEM - QRadar\footnote{Lásd \ref{subsec:qradar}}) között dolgoztam ki.
+Jelen dolgozat feladata egy olyan megoldás fejlesztése, mely lehetővé teszi a fent említett technológiák közti integrációt és az adatszinkronizációt. Az integrációt a IBM által kínált IdM (IBM Security Identity Manager - ISIM\footnote{Lásd \ref{subsec:ISIM} \nameref{subsec:ISIM}}) és SIEM (IBM Security QRadar SIEM - QRadar\footnote{Lásd \ref{subsec:qradar} \nameref{subsec:qradar}}) között dolgoztam ki.
  
 A végső megoldás két részből áll, egyrészt egy teljesen új funkcionalitást biztosító integrációs modulból, valamint egy már meglévő funkcionalitást bővítő kiegészítésből. Erre a feladatra eddig nem volt automatikus megoldás, ezért ez a projekt ezt a hiányt hivatott betölteni.
 
@@ -72,7 +72,7 @@ Az integráció megvalósítására két architektúrát is kidolgoztunk, amelye
 
 \subsection{Integráció TDI segítségével}
 
-A Tivoli Directory Integrator (TDI \footnote[3]{ref{foot:TDI}}) egy gyakran használt, általános célú integrációs eszköz. 
+A Tivoli Directory Integrator (TDI \footnote[3]{\label{foot:TDI}Lásd \ref{subsec:TDI} \nameref{subsec:TDI}}) egy gyakran használt, általános célú integrációs eszköz. 
 A TDI a segítségével a különböző adatforrásokat, amelyek más-más protokollon keresztül érhetők el, és más-más formátumban és struktúrában tárolják az adatokat, egy egységes ú.n.~Connector interfészen keresztül érhetjük el. Az adattranszformációs feladatokat ú.n.~assembly line formájában valósíthatjuk meg a TDI grafikus felületén. Egy assembly line egy műveletsort definiál, amely során felhasználhatjuk a connectorokat adat olvasásra, keresésre, kiírásra, valamint Javascript segíségével tetszőleges adattranszformációt valósíthatunk meg. A megfelelő protokoll és parser kiválasztásáról a használt connector gondoskodik, így az assembly line kompakt módon csak a valódi adattranszformációt definiálja. 
 
 A TDI gyári connectorkészletét kiegészítettem egy új, saját fejlesztésű connectorral, amely a fent említett wrapper könyvtár segítségével képes reference adatokat feltölteni és lekérni a QRadartól. A hálózati erőforrások hatékony használatának céljából a connector külön akkumulálja a feltöltendő adatokat, és a futása végén, egyben tölti azokat fel. Ez a connector általános célú TDI connector, így szabadon újra felhasználható nem csak az ISIM-mel való integrációra, hanem tetszőleges TDI assembly line formájában megvalósított integrcáiós feladatra. 
