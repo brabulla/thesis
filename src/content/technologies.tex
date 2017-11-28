@@ -53,6 +53,13 @@ Minden reference data-nak van egy típusa, ami meghatározza hogy az adott halma
 	\item DATE - Dátumok, miliszekundomokban 1970.01.01 óta
 \end{itemize}
 
+Emellett a reference data-ban található adatoknak lehet egy TTL értéke is, ami meghatározza, hogy mennyi idő elteltével törlendő az adott adat. Ennek 3 típusa lehet: 
+\begin{itemize}
+	\item UNKNOWN - \todo
+	\item LAST\_SEEN - Az adat utolsó feltöltésétől számítva kalkulálódik a TTL
+	\item FIRST\_SEEN - Az adat első feltöltésétől számítva kalkulálódik a TTL
+\end{itemize}
+
 A feladat megvalósítása során az ISIM-ből kinyert adatokat ilyen reference data-kba töltjük fel, a típust úgy változtatva, ahogy az indokolt a kinyert adat szempontjából. A dolgozat nem foglalkozik a már feltöltött adatok további felhasználásával valamint a dinamikus szabályrendszer használatával, pusztán az integráció megvalósítására koncentrál.
 
 \subsection{IBM Security Identity Manager - ISIM}
@@ -76,6 +83,17 @@ Az ISIM ezen információk tárolására két külső adattárolót használ: eg
 \label{subsec:TDI}
 A Tivoli Directory Integrator egy általános célú integrációs eszköz, ami lehetővé teszi több, különböző adatforrás koordinálását és integrációját. Mivel a legtöbb forrás más formátumot használ, és máshogy tárolja az adatot, egy ilyen integrációs lépés során szükséges bizonyos átalakításokat elvégezni az adatokon, valamint lehetséges hogy egyéb, plusz lépéseket is szükséges bevezetni, akár más adatforrások bevonásával. Ennek a procedúrának ad keretet a TDI egy grafikus fejlesztő felülettel, valamint a megfelelő Java alapú interfészekkel és kötésekkel, amelyek könnyűvé teszik új komponensek fejlesztését.
 
-A TDI alapvető struktúrája úgynevezett assembly line-okból áll. Egy assembly line jelképez egy adat transzfert, a kezdeti adatok felolvasásától az átalakításokon át, a végső kimenet feltöltéséig. A ki- és bemeneti interakció ún. connectorokon keresztül történik, amelyek egy egységes interfészt implementálnak, és valamilyen külső adatforráshoz való kapcsolódást valósítanak meg. Mivel a legtöbb adatforrás más formátumban tárolja az adatokat, a TDI minden be- valamint kimeneti műveletnél biztosít egy hozzárendelési lépést, amellyel megadhatjuk, hogy a külső attribútumok milyen belső attribútumokra legyenek leképezve. Ilyen ún. mapping lépést az assembly line-on bármikor végrehajthatunk, és emellett még számos átalakítási lépés áll rendelkezésre, mint például ciklusok vagy elágazások használata. A TDI talán egyik legfontosabb képessége a Javascriptből való testreszabhatóság. Ez azt jelenti, hogy az assembly line-on az adatokat szabadon manipulálhatjuk Javascriptes kódból, létrehozhatunk szkripteket amik a futtatás bizonyos pontjain aktiválódnak, valamint számtalan egyéb funkciót érhetünk el ezekből a programokból, mint például a logolás, paraméterek módosítása, vagy arbitrális kód futtatása.
+A TDI alapvető struktúrája úgynevezett assembly line-okból áll. Egy assembly line jelképez egy adat transzfert, a kezdeti adatok felolvasásától az átalakításokon át, a végső kimenet feltöltéséig. A ki- és bemeneti interakció ún. connectorokon keresztül történik, amelyek egy egységes interfészt implementálnak, és valamilyen külső adatforráshoz való kapcsolódást valósítanak meg. Minden connector, attól függően, hogy milyen műveletet végez 8 mód egyikében működik\footnote{A módok pontos leírása megtalálható a \ref{subsec:connimpl} szekcióban.}, valamint vagy aktív, vagy passzív módon dolgozik. Az előbbinél része az assembly line soros végrehajtásának, másikban nem, de külső vezérléssel működtethető.
+
+A legtöbb adatforrás eltérő formátumban kezeli az adatokat, így TDI minden be- valamint kimeneti műveletnél biztosít egy hozzárendelési lépést, amellyel megadhatjuk, hogy a külső attribútumok milyen belső attribútumokra legyenek leképezve. Ilyen ún. mapping lépést az assembly line-on bármikor végrehajthatunk, és emellett még számos átalakítási lépés áll rendelkezésre, mint például ciklusok vagy elágazások használata. Az assembly line-on haladó adatokat entry-k\footnote{\href{https://www.ibm.com/support/knowledgecenter/en/SSCQGF_7.1.0/com.ibm.IBMDI.doc_7.1/entryobject.htm}{A TDI Entry osztály leírása a hivatalos IBM dokumentációban.}} formájában kezeli a TDI. Egy entry egy elemi objektum, ami nevesített attribútumok halmazát képes tárolni. Ilyen entry-t bármelyik scriptben létre lehet hozni, de egy általános TDI assembly line esetén 4 darab nevesített entry-t használunk:
+
+\begin{itemize}
+	\item work: Az assembly line állandó entry-je. Ezen az objektumon keresztül utazik az adat az egyes komponensek között, valamint ezen hajtják végre az adatmódosító műveletket a connector-ok.
+	\item conn: Ezt az entry objektumot használják a connecot-ok a köztes adatok tárolására a célrendszerrel való kapcsolat során. Ebből az entry-ből kerülnek át az egyes mapping-ek során az adatok a work entry-be.
+	\item current: Bizonyos connector-ok update módjainál elérhető változó, ami a csatlakoztatott rendszeren található adatokat tartalmazza.
+	\item error: A hibakezelést végző komponensekben elérhető entry. A hibákkal kapcsolatos információkat tartalmazza.
+\end{itemize}
+
+A TDI talán egyik legfontosabb képessége a Javascriptből való testreszabhatóság. Ez azt jelenti, hogy az assembly line-on az adatokat szabadon manipulálhatjuk Javascriptes kódból, létrehozhatunk szkripteket amik a futtatás bizonyos pontjain aktiválódnak, valamint számtalan egyéb funkciót érhetünk el ezekből a programokból, mint például a logolás, paraméterek módosítása, vagy arbitrális kód futtatása.
 
 A dolgozat szempontjából az egyik legfontosabb része a TDI-nak a connectorok, mivel a feladat része volt egy ilyen fejelsztése, ami támogatja a kommunikációt egy QRadar szerverrel, azon belül is a QRadarban található reference data objektumokkal.

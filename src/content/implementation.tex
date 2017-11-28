@@ -48,11 +48,13 @@ Mivel a TDI által nyújtott keretrendszerbe illeszkedik a megoldás, így képe
 A megvalósításhoz szükség volt elsősorban egy connector létrehozására, majd ezt felhasználva implementáltam több lekérdezés típust, általunk, valamint az ügyfél által definiált esetekre.
 % Mod
  
-\subsection{QRadar connector fejlesztése TDI-hoz}
+\subsection{QRadar connector fejlesztése TDI-hoz}\label{subsec:connimpl}
 
-A TDI alapú megoldás első lépése egy connector fejlesztése volt a TDI és a QRadar közti integrációhoz. Ehhez segítségemre volt a hivatalos útmutató connector fejlesztéshez, ami az IBM oldalán megtalálható. Egy saját connector fejlesztése TDI alatt abból áll, hogy létrehozunk egy új Java osztályt ami implementálja a megfelelő, TDI által specifikált interfészt, ennek metódusain belül elkészítjük a kívánt üzleti logikát, majd egy xml leíró fájllal együtt, a megfelelő struktúrában becsomagoljuk azt egy JAR fájlba, amit a TDI által használt könyvtárak egyikébe másolunk. 
+A TDI alapú megoldás első lépése egy connector fejlesztése volt a TDI és a QRadar közti integrációhoz. Ehhez segítségemre volt a hivatalos útmutató connector fejlesztéshez\footnote{\href{https://www.ibm.com/support/knowledgecenter/en/SSCQGF_7.1.0/com.ibm.IBMDI.doc_7.1/referenceguide155.htm}{Hivatalos útmutó az IBM weboldalán}}. 
 
-Egy connector-nak nyolc működési módja lehet, amit a feljebb említett dokumentum specifikál. Ezek a következők:
+Egy saját connector fejlesztése TDI alatt abból áll, hogy létrehozunk egy új Java osztályt ami implementálja a megfelelő, TDI által specifikált interfészt, ennek metódusain belül elkészítjük a kívánt üzleti logikát. Majd készítünk egy xml alapú leíró fájlt, ami meghatározza a TDI számára, hogy a connector milyen paramétereket vár, azokat milyen formában, valamint a felhasználói felületen az egyes paraméterekhez milyen GUI elemek tartozzanak. Ezt a leírót, valamint a lefordított .class fájlokat a megfelelő struktúrában becsomagoljuk egy JAR fájlba, amit a TDI által használt könyvtárak egyikébe másolunk. 
+
+Egy connector-nak nyolc működési módja lehet, amit a feljebb említett dokumentum pontosabban is specifikál. Ezek a következők:
 
 
 \begin{itemize}
@@ -76,11 +78,9 @@ Egy connector-nak nyolc működési módja lehet, amit a feljebb említett dokum
 Egy connector nem feltétlenül támogat minden módot, a támogatni kívánt módok határozzák meg, hogy a fejlesztendő connector-nak milyen metódusokat kell implementálnia a megfelelő működéshez. 
 Például az AddOnly mód csak az Initialize, putEntry, és a terminate metódusokat használja, így ha a connector csak ezt akarja használni, elég ezeket implementálni. Ezzel szemben például az Update mód ezeken felül használja a findEntry, és a modEntry metódust is. Minden connector a saját logikáját definiálja, amivel megvalósítja az adott célrendszeren az absztrakt módon megfogalmazott műveletet. Egy JDBC connector például adatbázis parancsokkal valósítja meg a fent definiált műveleteket egy kapcsolaton keresztül. Jelen esetben egy REST API-n keresztül elérhető a kommunikáció a célrendszerrel, így a connector szabványos HTTP kéréseket használ. A fejlesztés során megvalósításra került az összes fent említett mód, kivéve a Server, és a CallReply, mivel ezek a konkrét kontextusban nem értelmezhetőek.
 
-% Mod
 Első lépésként tehát elkészítettem egy QRadarReferenceDataConnector osztályt, ami örököl egy generikus ősosztályból, ami már előre megvalósít olyan metódusokat a TDI által használt ConnectorInterface-en, amelyek nem kifejezetten connector specifikusak, hanem generikus feladatokat látnak el, például konfigurációs fájlok beolvasása vagy paraméterek beállítása.
-% Mod
 
-Az implementációs döntések megértéséhez fontos ismerni egy connector életciklusát. A connector létrejöttekor meghívódik a konstruktora, de ez a dokumentációban leírtaknak megfelelően nem szabad hogy paraméter és egyéb beállításokat tartalmazzon, mert a példány már létrejöhet az előtt, hogy a szükséges paraméterek beolvasásra kerültek. Ez azért történhet meg, mert ezt a konstruktort használja a TDI grafikus felülete a kezdeti beállítási és paraméterezési felület elkészítéséhez. A konfiguráló, valamint az erőforrás foglaló műveletek ezért az Initialize metódusban kaptak helyet, ami az assembly line futás elején hívódik meg. A connector objektum egészen az assembly line végéig életben marad, majd annak végén mielőtt a destruktor meghívódna, lefut az objektum terminate metódusa. Erre azért van szükség, hogy a connector megfelelően felszabadíthassa az általa foglalt erőforrásokat.
+Az implementációs döntések megértéséhez fontos ismerni egy connector életciklusát. A connector létrejöttekor meghívódik a konstruktora, de ez a dokumentációban leírtaknak megfelelően nem szabad hogy paraméter és egyéb beállításokat tartalmazzon, mert a példány már létrejöhet az előtt, hogy a szükséges paraméterek beolvasásra kerültek. Ez azért történhet meg, mert ezt a konstruktort használja a TDI grafikus felülete a kezdeti beállítási és paraméterezési felület elkészítéséhez. A konfiguráló, valamint az erőforrás foglaló műveletek ezért az Initialize metódusban kaptak helyet, ami az assembly line futás elején hívódik meg. A connector objektum egészen az assembly line végéig életben marad, majd az objektum törlődése előtt, lefut az terminate metódusa. Erre azért van szükség, hogy a connector megfelelően felszabadíthassa az általa foglalt erőforrásokat.
 
 A connector életciklus ismeretében, valamint a QRadar és a REST API-jának működése és telejsítménye miatt az megoldás mellett döntöttünk: az assembly line futása közben nem azonnal kerülnek fel az adatok a QRadar megfelelő reference data-jába, hanem azok először a connector egy változójában akkumulálódnak, és az életciklus végén, a terminate metódus segítségével kommitálódnak. Két ilyen változót használtam, egyet a törlendő, egyet az újonnan hozzáadandó elemek tárolására. A megvalósítás valamint a wrapper használata miatt adott volt, hogy ezeknek az akkumulátor változóknak a megvalósítását a QRadarApiWrapper mellé fejlesztett ReferenceData osztály, valamint leszármazottjai szolgáltassák.
 
@@ -175,7 +175,7 @@ A  \ref{fig:conntest1}-es Ábrán látható, hogy egy Javascript blokk formájá
  	\label{fig:qradartest1}
  \end{figure}
  
-A folyamat eredményességét, vagyis hogy az összes általam definiált szöveg felkerült e, a QRadar Reference Set módosító felületén keresztül ellenőriztem. Az végeredmény a \ref{fig:qradartest1} Ábrán látható. 
+A folyamat eredményességét, vagyis hogy az összes általam definiált szöveg felkerült e, a QRadar reference set módosító felületén keresztül ellenőriztem. Az végeredmény a \ref{fig:qradartest1} Ábrán látható. 
  
 A továbbiakban bemutatom egy egyszerűbb integrációs feladat megvalósítását, ami az ISIM-ben található árva account-okat szinkronizálja a QRadar számára. A feladat bővebb leírása, felhasználási területei a \ref{lbl:orphanaccs} fejezetben található. 
 
@@ -192,8 +192,8 @@ Jelen esetben a fő adatokat az ISIMLDAP connector szolgáltatja. Ez kapcsolódi
 
 Az account információkat tartalmazó entitásokat a Data Flow rész dolgozza fel. A findServiceName egy lookup connector, amire az accountokban tárolt információk miatt van szükség. Ugyanis az ISIM LDAP-ja az egyes accountokhoz a service-t, amihez tartoznak, egy erservice attribútumban tárolja, egy DN\footnote{\href{https://www.ldap.com/ldap-dns-and-rdns}{Distinguished Name, az egész LDAP címtárban egyedi értékű attribútum}} formájában. A connector ezekhez a DN-ekhez keresi meg a beszédes nevet, amit a serviceLSMappingReader connector által felolvasott párosítás indexelésére használok fel. Ezzel összeáll minden szükséges információ a feltöltéshez.
 
-Az adat végleges formáját a QRadarConnector állítja össze, ekkor jönnek létre a \textbf{QRadar logforrás név - Account név } párosítások. Ezeket az adatokat tölti fel a megfelelő Reference Data-ban, jelen esetben, mivel kulcs - értékek halmaza formátumot vesznek fel az adatok, ezért egy Reference Map of Sets-be. A futtatás eredménye a \ref{fig:orphanaccountresult} ábrán található
-\footnote{A könnyebb megtekinthetőség kedvéért jelen esetben az account-ok service-hez rendelését kihagytam, és egy Reference Set-be töltöttem be az adatokat. Ugyanis a QRadar a Reference Set-ek megtekintésére egy átláthatóbb felületet ad, mint a többihez, és így az eredmény könnyebben értelmezhető.}. 
+Az adat végleges formáját a QRadarConnector állítja össze, ekkor jönnek létre a \textbf{QRadar logforrás név - Account név } párosítások. Ezeket az adatokat tölti fel a megfelelő reference data-ban, jelen esetben, mivel kulcs - értékek halmaza formátumot vesznek fel az adatok, ezért egy reference map of sets-be. A futtatás eredménye a \ref{fig:orphanaccountresult} ábrán található
+\footnote{A könnyebb megtekinthetőség kedvéért jelen esetben az account-ok service-hez rendelését kihagytam, és egy reference set-be töltöttem be az adatokat. Ugyanis a QRadar a reference set-ek megtekintésére egy átláthatóbb felületet ad, mint a többihez, és így az eredmény könnyebben értelmezhető.}. 
 A felsorolásban láthatók a felhasználói fiókok neveinek egy részhalmaza. Mivel a tesztrendszeren az ISIM felügyelete alatt egy linuxos rendszer található, amely sok technikai account-tal rendelkezik, így a listában főleg ezek láthatók.
 
 \begin{figure}[h]
@@ -329,7 +329,7 @@ A koncepció, valamint a fejlesztett megoldások tesztelésére az alábbi use-c
 	\end{itemize}
 	
 \end{itemize}
-\section{QRadar esemény küldő fejlesztése}
+\section{QRadar esemény küldő és feldolgozó fejlesztése}
 A feladat motivációja, az eddig felsorolt problémákhoz hasonlóan, a QRadar monitorozási és detektálási hatékonyságának bővítése az ISIM segítségével. Az előző két implementált megoldásban az ISIM-ben tárolt felhasználói adatok egy részhalmazát tettem elérhetővé a QRadar szabályrendszere számára, mert ezek a plusz információk hasznosak lehetnek az események értelmezésében. Ezzel szemben ennél a megoldásnál az ISIM mint log forrást illesztettem a QRadarhoz. Egy ilyen megoldás már rendelkezésre állt, de az a QRadar JDBC csatlakozóját használja, ami limitált képességekkel bír (például nem join-olhatók vele táblák), és csak az ISIM-ben található audit információkat kezelte.
 
 A fejlesztett megoldás célja más, nem audittal kapcsolatos információk küldése a QRadar számára log formájában. Ezek is fontosak lehetnek biztonsági eseményeknél, hiszen például az ISIM-ben futó/futott folyamatok információit felhasználva új incidenseket vehetünk észre. Ilyenek lehetnek jelszó változtatások (például egy széles jogkörrel rendelkező felhasználó jelszó cseréje nem várt időpontban), az ISIM szabályrendszerének változása, vagy például kézi jóváhagyás műveletek. 
@@ -378,31 +378,31 @@ A következő lépés az adatok átalakítása volt a QRadar számára könnyen 
 %RÖVIDTÁBLANÉV\_OSZLOPNÉV=ÉRTÉK;RÖVIDTÁBLANÉV\_OSZLOPNÉV=ÉRTÉK;RÖVIDTÁBLANÉV\_OSZLOPNÉV=ÉRTÉK;...
 
 
-A generálás utolsó lépése a sorok felküldése volt syslog protokollon keresztül a QRadar megfelelő fogadó interfészére. Ehhez a beépített Log connector-t használtam, egy egyedileg konfigurált Log4J logger segítségével. Az egyedi konfiguráció definiálja, hogy a beépített syslog logger legyen a használt logolási mód, milyen IP-re és portra küldjük az üzeneteket, valamint milyen formátumban.
+A generálási folyamat utolsó lépése a sorok felküldése syslog protokollon keresztül a QRadar megfelelő fogadó interfészére. Ehhez a beépített Log connector-t használtam, egy egyedileg konfigurált Log4J logger segítségével. Az egyedi konfiguráció definiálja, hogy a beépített syslog logger legyen a használt logolási mód, milyen IP-re és portra küldjük az üzeneteket, valamint milyen formátumot használjon a logger az üzenet előállításához.
 
-A Log4J által biztosított syslog logger azonban alapértelmezetten nem volt megfelelő erre a célra, mivel úgy implementálták azt, hogy az 1019 byte-nál hosszabb üzeneteket tördelje megfelelő méretűvé, és több részben küldje tovább. Ez a QRadar oldalán azt okozta, hogy a logsor tördelékek külön eseményenként kerültek rögzítésre, ami nem volt megfelelő a kívánt működés szempontjából. A QRadar azonban biztosít egy megoldást a töredékek kezelésére: az UDP multiline syslog\footnote{ \href{https://www.ibm.com/support/knowledgecenter/SS42VS_7.2.2/com.ibm.qradar.doc_7.2.2/t_logsource_UDPmultiprotocol.html}{UDP multiline syslog dokumentáció}} kezelést, amihez a töredék üzeneteket ki kellett egészítenem azonosítókkal.
+A Log4J által biztosított syslog logger azonban implementációjából fakadóan nem volt megfelelő a QRadar irányába syslog üzenetek küldésére, mivel az 1019 byte-nál hosszabb üzeneteket több üzenetté tördelte. Emiatt a QRadar a töredékeket külön eseményekként kezelte. A problémára több megoldás is kínálkozott, például egy máshogyan implementált logger használata, vagy egy saját fejlesztése, de végül a dependenciák minimalizálása, és felesleges munka elkerülése végett a QRadar egy speciális működési módját használtuk, az UDP multiline syslog-ot\footnote{ \href{https://www.ibm.com/support/knowledgecenter/SS42VS_7.2.2/com.ibm.qradar.doc_7.2.2/t_logsource_UDPmultiprotocol.html}{UDP multiline syslog dokumentáció}}. Ennél a módnál a QRadar az ehhez definiált forrásoktól olyan üzeneteket vár, amik tartalmaznak egy egyedi azonosítót. Az azonosító felismerését egy reguláris kifejezéssel végzi a QRadar, és az értéke bármilyen karakterlánc lehet. Ennek az azonosítónak a lényege, hogy ezen keresztül azonosítja a QRadar az összetartozó tördelékeket, és a több ilyen azonosítóval rendelkező üzeneteket összefűzi egy eseménnyé.
 
-A probléma megoldására átalakítottam a TDI assembly line-t úgy, hogy a tördelési műveletet saját magam végzem, a megadott szabályok szerint. A tényleges payload-ot maximum 800 karakter méretű szeletekre tördelem, figyelve az attribútum határokat jelölő pontosvesszőkre. Így, a képzett syslog header-rel együtt, az üzenetek nem haladják meg a limitet, és egyben kerülnek elküldésre. 
+Az UDP multiline syslog mód támogatására átalakítottam a TDI assembly line-t úgy, hogy a tördelési műveletet saját magam végzem, megadott szabályok szerint. A tényleges payload-ot maximum 800 karakter méretű szeletekre tördelem, figyelve az attribútum határokat jelölő pontosvesszőkre. Így, a generált syslog header-rel együtt, az üzenetek nem haladják meg a limitet, és egyben kerülnek elküldésre. 
 
 A szükséges egyedi azonosítókat szintén TDI-ban generálom. Mivel nem kriptográfiailag biztonságos véletlenek generálásáról van szó, hanem csak egy megfelelően nagy spektrumban egyedi azonosítókról, ezért ehhez egy egyszerű, Javascript alapú pszeudo random uuid generálást használok. Ez 8 darab 0000 - ffff értékig terjedő stringből áll, ami összesen $16^{4 * 8} $ darab egyedi kombinációt ad, ami a feladat szempontjából elégséges méretű tartományt. Ezzel a lépéssel az adatok előálltak, és a QRadar számára olvasható formátumba kerültek.
 
 
 \subsection{QRadar oldali esemény fogadó fejlesztése}
 
-Ezek után a QRadar oldali fogadást kellett biztosítanom. Ezt a már említett UDP multiline syslog segítségével tettem. Ezt egy eseményforrás felkonfigurálásánál kell megadni, és annyiban különbözik az átlagos syslog protokollon érkező üzenetektől, hogy az 514-es port helyett az 517-est használja, valamint a beérkező üzeneteknek rendelkeznie kell egy azonosítóval. Ha az azonosító két vagy több üzenetben megegyezik, akkor azokat a QRadar összefűzi egy eseménnyé.
+A QRadar oldali fogadást a már említett UDP multiline syslog segítségével biztosítottam. Ezt egy eseményforrás felkonfigurálásánál kell megadni, és annyiban különbözik az átlagos syslog protokollon érkező üzenetektől, hogy az 514-es port helyett az 517-est használja, valamint a beérkező üzeneteknek rendelkeznie kell a már tárgyalt egyedi azonosítóval. Ha az azonosító két vagy több üzenetben megegyezik, akkor azokat a QRadar összefűzi egy eseménnyé.
 
-Ezek alapján felkonfiguráltam egy új eseményforrást IBM Identity Manager néven, ami UDP multiline syslog-okat fogad. Ezek azonosításához egy \textit{msg\_uuid} mezőt keres, az alábbi regex segítségével: 
+Ezek alapján felkonfiguráltam egy új eseményforrást IBM Identity Manager néven, ami UDP multiline syslog-okat fogad. Az egyedi azonosítók feldolgozásához egy \textit{msg\_uuid} mezőt keres a property feldolgozó, az alábbi regex segítségével: 
 
 \begin{lstlisting}
 msg_uuid=(.*?[^\\]);
 \end{lstlisting}
 
-Ezután a QRadar-t kellett felkészítenem az események kezelésére. Ehhez létrehoztam egy saját esemény típust, amelyet egy saját syslog header alapján azonosítok. A típus határozza meg, hogy a QRadar milyen szabályok szerint, milyen attribútumokat próbál meg az azonosított eseményből feldolgozni, valamint azokat hogyan használja fel a továbbiakban. Ehhez elkészítettem az összes lehetséges felküldött attribútumhoz a megfelelő regex kifejezést. Mivel az adatok normalizálásánál egy egységes szisztémát követtem, ezért az összes parse-oló regex az alábbi sémára épül:
+Az összeállított üzenetek eseménnyé alakításához definiáltam egy saját esemény típust, amelyet egy egyedi syslog header alapján azonosítok. A típus határozza meg, hogy a QRadar milyen szabályok szerint, milyen attribútumokat próbál meg az azonosított eseményből feldolgozni, valamint azokat hogyan használja fel a továbbiakban. Ehhez elkészítettem az összes lehetséges felküldött attribútumhoz a megfelelő regex kifejezést. Mivel az adatok normalizálásánál egy egységes szisztémát követtem, ezért az összes parse-oló regex az alábbi sémára épül:
 
 \begin{lstlisting}
 	ATTRIBÚTUM_NÉV=(.*?[^\\]);
 \end{lstlisting}
 
-Ennél a reguláris kifejezésnél az attribútum értéke pontosan az első találati csoportban érhető el, valamint a felépítése miatt megfelelően kezeli az \todo eszképelt pontosvesszőket is.
+Ennél a reguláris kifejezésnél az attribútum értéke pontosan az első találati csoportban érhető el, amibe minden karakter beletartozik, ami az attribútum nevet követő egyenlőség jel, és az első olyan pontosvessző között található, ami előtt nem backslash áll.
 
 \todo Screenshot előtte, utána\\

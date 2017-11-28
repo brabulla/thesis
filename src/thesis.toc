@@ -19,12 +19,12 @@
 \select@language {magyar} \contentsline {subsection}{\numberline {3.2.2}Connector m\IeC {\H u}k\IeC {\"o}d\IeC {\'e}s\IeC {\'e}nek bemutat\IeC {\'a}sa}{17}{subsection.3.2.2}
 \select@language {magyar} \contentsline {section}{\numberline {3.3}WAS integr\IeC {\'a}ci\IeC {\'o} megval\IeC {\'o}s\IeC {\'\i }t\IeC {\'a}sa}{19}{section.3.3}
 \select@language {magyar} \contentsline {subsection}{\numberline {3.3.1}Architekt\IeC {\'u}ra tervez\IeC {\'e}se}{20}{subsection.3.3.1}
-\select@language {magyar} \contentsline {section}{\numberline {3.4}Query-k implement\IeC {\'a}ci\IeC {\'o}ja}{21}{section.3.4}
-\select@language {magyar} \contentsline {section}{\numberline {3.5}QRadar esem\IeC {\'e}ny k\IeC {\"u}ld\IeC {\H o} fejleszt\IeC {\'e}se}{23}{section.3.5}
-\select@language {magyar} \contentsline {subsection}{\numberline {3.5.1}TDI alap\IeC {\'u} syslog k\IeC {\"u}ld\IeC {\H o} fejleszt\IeC {\'e}se}{23}{subsection.3.5.1}
+\select@language {magyar} \contentsline {section}{\numberline {3.4}Query-k implement\IeC {\'a}ci\IeC {\'o}ja}{22}{section.3.4}
+\select@language {magyar} \contentsline {section}{\numberline {3.5}QRadar esem\IeC {\'e}ny k\IeC {\"u}ld\IeC {\H o} \IeC {\'e}s feldolgoz\IeC {\'o} fejleszt\IeC {\'e}se}{23}{section.3.5}
+\select@language {magyar} \contentsline {subsection}{\numberline {3.5.1}TDI alap\IeC {\'u} syslog k\IeC {\"u}ld\IeC {\H o} fejleszt\IeC {\'e}se}{24}{subsection.3.5.1}
 \select@language {magyar} \contentsline {subsection}{\numberline {3.5.2}QRadar oldali esem\IeC {\'e}ny fogad\IeC {\'o} fejleszt\IeC {\'e}se}{25}{subsection.3.5.2}
-\select@language {magyar} \contentsline {chapter}{\numberline {4}Megold\IeC {\'a}sok telep\IeC {\'\i }t\IeC {\'e}se, haszn\IeC {\'a}lata}{26}{chapter.4}
-\select@language {magyar} \contentsline {section}{\numberline {4.1}TDI alap\IeC {\'u} integr\IeC {\'a}ci\IeC {\'o}s modul}{26}{section.4.1}
-\select@language {magyar} \contentsline {subsection}{\numberline {4.1.1}Dependenci\IeC {\'a}k}{26}{subsection.4.1.1}
-\select@language {magyar} \contentsline {subsection}{\numberline {4.1.2}Telep\IeC {\'\i }t\IeC {\'e}s}{26}{subsection.4.1.2}
-\select@language {magyar} \contentsline {chapter}{\numberline {5}\IeC {\"O}sszefoglal\IeC {\'a}s}{27}{chapter.5}
+\select@language {magyar} \contentsline {chapter}{\numberline {4}Megold\IeC {\'a}sok telep\IeC {\'\i }t\IeC {\'e}se, haszn\IeC {\'a}lata}{27}{chapter.4}
+\select@language {magyar} \contentsline {section}{\numberline {4.1}TDI alap\IeC {\'u} integr\IeC {\'a}ci\IeC {\'o}s modul}{27}{section.4.1}
+\select@language {magyar} \contentsline {subsection}{\numberline {4.1.1}Dependenci\IeC {\'a}k}{27}{subsection.4.1.1}
+\select@language {magyar} \contentsline {subsection}{\numberline {4.1.2}Telep\IeC {\'\i }t\IeC {\'e}s}{27}{subsection.4.1.2}
+\select@language {magyar} \contentsline {chapter}{\numberline {5}\IeC {\"O}sszefoglal\IeC {\'a}s}{28}{chapter.5}
