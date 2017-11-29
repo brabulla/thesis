@@ -286,49 +286,73 @@ A tervezésnél az alábbi döntéseket hoztuk:
 
 
 \section{Query-k implementációja} \label{sec:queryk}
-% Mod
+
 A koncepció, valamint a fejlesztett megoldások tesztelésére az alábbi use-case-eket definiáltuk:
 
-\begin{itemize}
-	\item Felhasználói fiókok egy adott menedzselt rendszeren
-	\begin{itemize}
-		\small
-		\item Felhasználása: Ellenőrizhető, hogy az eseményben jelzett fiók az ISIM által kezelt e, és ha nem, az okot adhat biztonsági riasztásra.
-		\item Megvalósítás: Szűrés az LDAP-ban található felhasználói fiókokra, aszerint, hogy melyik service-hez tartoznak.
-	\end{itemize} 
-	\item Inaktív felhasználókhoz tartozó fiókok
-	\begin{itemize}
-		\small
-		\item Felhasználása: A SIEM riasztást adhat ha olyan tevékenység történik, ami ezekhez a felhasználói fiókokhoz kapcsolódik. Ezek elsősorban akkor következhetnek be, vagy akkor jelenthetnek kockázatot, ha a felfüggesztés a felhasználó fiókjaira valamiért nem érvényesült, és képes használni. De felhasználható visszamenőleg is, irreguláris tevékenységek keresésére.
-		\item Megvalósítás: LDAP szűrés az összes inaktív felhasználóra, majd szűrés az összes fiókra, az alapján, hogy tulajdonosa e az egyik megtalált felhasználó e.
-	\end{itemize}
-	\item Felfüggesztési eljárás alatt álló felhasználók fiókjai
-	\begin{itemize}
-		\small
-		\item Felhasználása: A SIEM riasztást adhat ezen felhasználói fiókok detektálásakor. Biztonsági szempontból első sorban azért érdekes, mert a felfüggesztett személyeket általában okkal, és jogvesztéssel együtt függesztik fel (bírósági vizsgálat, kirúgás, stb), emiatt lehetséges hogy a felfüggesztés célpontja bosszúból valami ártalmas tevékenységet követ el.
-		\item Megvalósítás: Adatbázis keresés a jelen pillanatban futó felfüggesztési folyamatokra, majd az ebből kinyert felhasználó azonosítója alapján LDAP szűrés az összes fiók között.
-	\end{itemize}
-	\item Törlési folyamat alatt álló felhasználói fiókok
-	\begin{itemize}
-		\small
-		\item Felhasználása: Az előző esethez hasonlóan a törlés is egy jogfosztó művelet, ami ha nem atomi módon fut le, hanem például valamilyen kommunikációs hiba miatt megakad, akkor egy ablak nyílik a rosszindulatú felhasználók számára, hogy kárt tegyenek a rendszerben.
-		\item Megvalósítás:  Adatbázis keresés a jelen pillanatban futó felhasználói fiók törlési folyamatokra.
-	\end{itemize}
-	\item Árva fiókok \label{lbl:orphanaccs}
+\subsection{Felhasználói fiókok egy adott menedzselt rendszeren}
+	A query célja az ISIM által kezelt egyes service-eken található összes felhasználói fiók összegyűjtése, és egy Map of sets típusú reference data formájában feltöltése. 
+	\subsubsection{Felhasználása} 
+		Bizonyos biztonsági események tartalmazhatnak információkat nem csak arról, hogy milyen műveletet hajtottak végre, hanem azt is, hogy ki hajtotta ezt végre. Ennek azonosítása általában az adott rendszeren található felhasználói névvel történik. Ennek a query-nek az eredményeként felkerült adatok használatával ellenőrizhető, hogy az eseményben jelzett fiók az ISIM által kezelt e, és például ha nem, az okot adhat biztonsági riasztásra.
+		 
+	\subsubsection{Megvalósítás}
+		Szűrés az LDAP-ban található felhasználói fiókokra, aszerint, hogy melyik service-hez tartoznak.
+		
+		Ezt egy filterrel értem el, aminek a kiindulási pontja a felhasználókhoz tartozó fiókokat, valamint az árva fiókokat tartalmazó strukturális egység felett található. Szűrési paraméternek beállítottam az alábbi filter-t: 
+\begin{lstlisting}
+(&(erservice=" + serviceDN + ")(objectclass=eraccountitem))
+\end{lstlisting}
+	Ezzel kiszűrtem az összes felhasználói fiókot (account) a rendszerben, mivel az ISIM mindegyik accountra hozzáadja objectclass-nak az eraccountitem-et. Majd ezen kívül szűrök még az erservice attribútumra, ami minden accountnál azt tárolja, hogy melyik service-en található az adott account.
 	
-	\begin{itemize}
-		\small
-		\item Felhasználása: Ezek olyan fiókok, melyek nem köthetők valós, a rendszerben kezelt személyhez. Ilyenek lehetnek például a rendszer által menedszelt technikai fiókok, vagy olyanok, amik korábban valós felhasználókhoz tartoztak, de valamiért megmaradtak a szétválás után is. Ezek komoly biztonsági rést jelenthetnek, elsősorban ha például hozzáférnek kritikus rendszerekhez, de megmaradt a alapértelmezett jelszavuk, vagy nem alkalmazták rájuk a jelszó házirendeket.
-		\item Megvalósítás: Mivel az ISIM az LDAP adatbázisában ezeket a fiókokat külön tárolja, elég ezt lekérnünk. Majd a kinyert adatok alapján hozzárendeljük őket a megfelelő service-hez, és annak a megfelelő azonosítójához.
-	\end{itemize}
-	\item Egy menedzselt rendszeren a megadott csoportokba tartozó felhasználói fiókok
-	\begin{itemize}
-		\small
-		\item Felhasználása: A legtöbb informatikai rendszeren létezik valamilyen felhasználói fiók csoportosítás, ami többnyire az azonos jogkörrel rendelkező fiókokat definiálja. Ha megvannak egy adott csoportba tartozó fiókok nevei, akkor könnyen létrehozhatunk irregularitás detektáló szabályokat, mint például ha a privilegizált felhasználók munkaidőn kívül lépnek be, ami jelentheti akár a fiókjuk kompromittálódását is.
-		\item Megvalósítás: LDAP szűrés az előre definiált csoport attribútum alapján, az adott service-hez tartozó felhasználói fiókokon.
-	\end{itemize}
 	
-\end{itemize}
+\subsection{Inaktív felhasználókhoz tartozó fiókok}
+	A query célja azoknak a felhasználói fiókoknak az összegyűjtése, amiknek a tulajdonosa inaktív állapotban van, és egy set formájában feltölteni. Ezek olyan felhasználók, akiket az ISIM rendszerben felfüggesztettek.
+	\subsubsection{Felhasználása}
+		Egy felhasználó felfüggesztése általában valami jogvesztéssel járó procedúra során következik be, amikor nem biztos még a végkimenetel, de az időtartamára szeretnénk a felhasználót kivonni a rendszer által biztosított jogkörökből. 
+		Ha azonban valamiért nem volt sikeres a kivonás, vagy a felhasználói fiókok felfüggesztése, akkor súlyos biztonsági rés keletkezhet a rendszerben.
+		
+		Ennek detektálására a SIEM biztonsági riasztást adhat, ha olyan tevékenység történik, ami a kigyűjtött, inaktív felhasználók fiókjaihoz kapcsolódik. Emellett ezek az adatok felhasználhatóak visszamenőleg is, például egy felelősségre vonási eljárásnál, egy adott személy historikus tevékenységének ellenőrzésére.
+		 
+	\subsubsection{Megvalósítás}
+		
+		Az inaktív felhasználókat az \textit{erpersonstatus} attribútum alapján szűröm, majd az eredményként kapott objektumok DN-jével létrehozok egy második filtert, ami az összes DN-t vagy kapcsolatban tartalmazza. Ennek segítségével szűrök az accountokat taralmazó organizációs egységen.
+		
+\subsection{Felfüggesztési eljárás alatt álló felhasználók fiókjai}
+Az előző query-nél tárgyalthoz nagyon hasonló eset, de míg az előzőnél a már felfüggesztett, tehát a befejeződött folyamatú emberekre szűrünk, itt azokra, akiknél még zajlik az eljárás. Ez általában elég ritka, mivel a felfüggesztésnek pont az a lényege, hogy gyors, átmeneti jogvesztéssel jár, de megeshet, hogy például egy jóváhagyás miatt egy felfüggesztési eljárás nem fejeződik be.\footnote{Például egy másik, hasonlóan magas posztban álló manager emberét akarná felfüggeszteni, mert szabálysértésen kapta, de mivel azonos szervezeti szinten állnak, szükség van a jóváhagyásra a másik managertől, aki épp szabadságon van. Ekkor amíg vissza nem érkezik, addig áll a folyamat.}
+	\subsubsection{Felhasználása}
+		Az előző esethez hasonlóan itt is jogvesztés elmaradása áll fent, ami biztonsági réssel fenyeget. A SIEM riasztást adhat ezen felhasználói fiókok detektálásakor. 
+	\subsubsection{Megvalósítás}
+		Egy két lépcsős folyamatban előbb az adatbázisban keresek az alábbi utasítással:
+		\begin{lstlisting}
+Select REQUESTEE from PROCESS where type = 'US' and state in ('R','I','S')
+\end{lstlisting}
+		ami kiválasztja a folyamat célpontját (annak is a DN-jét), az összes olyan folyamatra, ami futó, felfüggesztett, vagy megszakított állapotban van, és a tíusa 'US', azaz User Suspend.
+		
+		Ezt követően az előző query-hez hasonlóan lekérem a személyekhez tartozó account-okat egy LDAP lekéréssel.
+		
+\subsection{Törlési folyamat alatt álló felhasználói fiókok} 
+Szintén az előző query-hez hasonló eset, csak itt a törlés alatt álló accountokat keressük. Feltöltés előtt egy transzformációt hajtok végre, amivel az account halmazokat egy QRadar logforráshoz rendelem, ezzel készítve egy map of sets-t.  
+	\subsubsection{Felhasználása}
+		Az előző esethez hasonlóan a törlés is egy jogfosztó művelet, ami ha nem atomi módon fut le, hanem például valamilyen kommunikációs hiba miatt megakad, akkor egy ablak nyílik a rosszindulatú felhasználók számára, hogy kárt tegyenek a rendszerben. Ezeknek a detektálására készíthetünk szabályokat a QRadarban, amik figyelik az ilyen típusú támadásokat, és jeleznek.
+		 
+	\subsubsection{Megvalósítás} 
+		Az adatbázisból lekérdezem a jelen pillanatban futó felhasználói fiók törlési folyamatokat. Ezt a Process táblában való kereséssel teszem, az olyan folyamatokra, amelyek állapota futó, felfüggesztett vagy megszakított. Emellett szűrök a process típusára is, ami jelen esetben 'AD', vagyis Account Delete. Ezekből a kapott adatokból a Subject mezőt felhasználva megkapom az account nevét, a Subject\_service mezóvel pedig a service-t, amihez tartzoik. Utolsó lépésként elvégzek egy map lépést, egy előre definiált párosítás alapján, ami QRadar logforrás neveket rendel a megfelelő account-ok halmazához.
+	
+\subsection{Árva fiókok } \label{lbl:orphanaccs}
+Az árva fiókok olyan fiókok, melyek nem köthetők valós, a rendszerben kezelt személyhez. Ilyenek lehetnek például a rendszer által menedszelt technikai fiókok, vagy olyanok, amik korábban valós felhasználókhoz tartoztak, de valamiért megmaradtak a szétválás után is. 
+	\subsubsection{Felhasználása}
+ 	Az árva fiókok jelenléte komoly biztonsági rést jelenthetnek, elsősorban ha például hozzáférnek kritikus rendszerekhez, de megmaradt a alapértelmezett jelszavuk, vagy nem alkalmazták rájuk a megfelelő jelszó házirendeket, ezért fontos lehet, hogy tudjuk detektálni ezeknek a fiókoknak az összes tevékenységét, mert bármelyik fenyegetést jelenthet.
+	\subsubsection{Megvalósítás}
+	Az ISIM az LDAP adatbázisában ezeket a fiókokat egy külön organizációs egységben tárolja, így elég ezt kérem le. A kinyert account-okat egy előre definiált map alapján hozzárendelem a megfelelő service-hez, és annak a megfelelő azonosítójához.
+	
+\subsection{Megadott csoportokba tartozó felhasználói fiókok, menedzselt rendszer szerint}		
+A query célja az összes felhasználói fiók összegyűjtése egy menedzselt rendszerről, és az adott rendszeren való csoporttagságuk alapján egy map of setsbe rendezése. A query megvalósításánál külön kihívást jelentett, hogy az egyes accountok más attribútum névvel tárolják a csoportot jelző attribútumot, így azt is külön ki kellett keresni.
+	\subsubsection{Felhasználása}
+		A legtöbb informatikai rendszeren létezik valamilyen felhasználói fiók csoportosítás, ami többnyire az azonos jogkörrel rendelkező fiókokat definiálja. Ha megvannak egy adott csoportba tartozó fiókok nevei, akkor könnyen létrehozhatunk irregularitás detektáló szabályokat, mint például ha a privilegizált felhasználók munkaidőn kívül lépnek be, ami jelentheti akár a fiókjuk kompromittálódását is. Ehhez azért van szükség a csoportokra, mert gyakran hasznos, ha tudjuk szűrni, hogy pontosan kiknek, vagy milyen jogkörrel rendelkező felhasználókat figyelünk.
+		 
+	\subsubsection{Megvalósítás}
+		Egy LDAP szűréssel lekérdezem a kijelölt service-hez tartozó account-okat és az összes attribútumukat, valamint a service típusán keresztül, majd a definíciója segítségével lekérem a rajta található account-ok csoport attribútumának nevét. Az accountokat ezután összerendelem a csoportok szerint, és elkészítem a map of sets-et.
+	
+	
 \section{QRadar esemény küldő és feldolgozó fejlesztése}
 A feladat motivációja, az eddig felsorolt problémákhoz hasonlóan, a QRadar monitorozási és detektálási hatékonyságának bővítése az ISIM segítségével. Az előző két implementált megoldásban az ISIM-ben tárolt felhasználói adatok egy részhalmazát tettem elérhetővé a QRadar szabályrendszere számára, mert ezek a plusz információk hasznosak lehetnek az események értelmezésében. Ezzel szemben ennél a megoldásnál az ISIM mint log forrást illesztettem a QRadarhoz. Egy ilyen megoldás már rendelkezésre állt, de az a QRadar JDBC csatlakozóját használja, ami limitált képességekkel bír (például nem join-olhatók vele táblák), és csak az ISIM-ben található audit információkat kezelte.
 
@@ -405,4 +429,34 @@ Az összeállított üzenetek eseménnyé alakításához definiáltam egy sajá
 
 Ennél a reguláris kifejezésnél az attribútum értéke pontosan az első találati csoportban érhető el, amibe minden karakter beletartozik, ami az attribútum nevet követő egyenlőség jel, és az első olyan pontosvessző között található, ami előtt nem backslash áll.
 
-\todo Screenshot előtte, utána\\
+
+% Table generated by Excel2LaTeX from sheet 'Sheet1'
+% Table generated by Excel2LaTeX from sheet 'Sheet1'
+\begin{table}[htbp]
+	\centering
+	\caption{Add caption}
+	\begin{tabular}{lp{8cm}p{4cm}}
+		Attribútum név & Attribútum funkciója & Attribútum jelentősége \\
+		\midrule
+		A\_ACTIVITY\_INDEX & Activity számláló azonosítója, ha egy ciklusban szerepel &  \\
+		A\_COMPLETED & Az activity befejezésének időpontja &  \\
+		A\_DESCRIPTION & Maximum 300 karakteres, beszédes leírása az activity-nek &  \\
+		A\_ID & Activity egyedi azonosítója &  \\
+		A\_LASTMODIFIED & Az activity utolsó módosításának dátuma &  \\
+		A\_LOCK\_COUNT & A függőben lévő feladatok az activity-n &  \\
+		A\_LOOP\_COUNT & Iteráció specifikus érték. Az eltelt iterációk száma. &  \\
+		A\_LOOP\_RUNCOUNT & Aszinkron ciklusos activity-k értéke. A hátralévő iterációk száma &  \\
+		A\_NAME & Acvitiy neve & Segíti az activity azonosítását \\
+		A\_PRIORITY & Activity prioritása &  \\
+		A\_PROCESS\_ID & Az adott activity-hez tartozó process egyedi azonosítója & Ezen keresztül köthető össze a process táblával. \\
+		A\_RESULT\_DETAIL & Végeredmény beszédes leírása &  \\
+		A\_RESULT\_SUMMARY & Két karakteres leírása a végeredménynek & Ezzel a mezővel szűrhetünk az activity-k végeredményének állapotára. \\
+		A\_RETRY\_COUNT & Próbálkozások száma az activity végrehajtására &  \\
+		A\_SHORT\_DETAIL & Rövid, szöveges leírása az activity végeredményének &  \\
+		A\_STARTED & Az activity indításának időpontja &  \\
+		A\_STATE & Az activity aktuális állapota & Futó, megállt, befejezett, stb állapot szerint szűrhetünk. \\
+	\end{tabular}%
+	\label{tab:addlabel}%
+\end{table}%
+
+
