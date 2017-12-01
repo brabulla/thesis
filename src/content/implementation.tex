@@ -33,11 +33,13 @@ Magának a HTTP forgalomnak és a REST hívásoknak a lebonyolítására az Apac
 
 A wrapper a különböző reference data-k transzparens kezelésén túl egyéb funkciókat is ellát, mint például segéd funkciók biztosítása, vagy a hibák egységes kezelése. Ilyen segéd funkciók a különböző adattranszformációk a használt típusok és a JSON formátum között, vagy például különböző ellenőrzések egy reference data létezésére, vagy egy aszinkron törlés lefutására. A hibakezelés menedzselésére a wrapper egy saját kivétel osztályt definiál, ami minden, a sikeres lefutástól eltérő esetben (akár belső hiba, akár a QRadarral való kommunikáció közben fellépő hiba) eldobásra kerül. Ez az objektum tartalmaz egy szöveges üzenetet, ami a hiba okára utal, valamint egy státusz kódot, ami ha HTTP kommunikáció közbeni hiba történt, annak a kódját tartalmazza, ha belső működésbeli hiba (például parse-olási hiba) akkor egy 0-nál kisebb számot tartalmaz. Ez egységesen és könnyen használhatóvá teszi a felsőbb rétegek számára, ahol például logolást kezeljük, mert egyértelmű, hogy a hiba milyen forrásból adódott. A saját kivétel típus pedig tovább könnyíti a hibák elválasztását, főleg ha a wrapper-t egy nagyobb framework-ben használjuk.
 
-Ezen kívül a QRadar reference data-i támogatják még az inputok különböző típusú validációját, valamint egy elévülési információ hozzárendelését. A típus validáció abban valósul meg, hogy beállítható a reference data-ban található adat típusa, és feltöltéskor a QRadar ezt validálja, valamint feldolgozza. A típusokra az alábbi lehetőségek állnak rendelkezésre: Alphanumeric, Alphanumeric ignore case, Numeric, IP, Port, Date. 
+A wrapper támogatja a QRadar által használt összes adattípust (ALN, ALNIC, IP, NUM, PORT, DATE), az REST hívások be- és kimenetét az adott típus által megkövetett JSON formátumban állítja elő/dolgozza fel.
 
-Az elévülési információk két részből tevődnek össze: az egyik az elévülés ideje, a másik típusa, vagyis milyen szabály alapján évüljenek el az adatok. Ennek a lehetséges értékei az UKNOWN, a LAST\_SEEN, és a FIRST\_SEEN, amik azt határozzák meg, hogy az elévülési időt honnan számoljuk: az adott adat először bekerülésének idejétől, vagy az utolsótól. Az elévülési időt szöveges formátumban (pl.: 36 hours) várja a QRadar API-ja, amit feldolgoz, és valós idő értékekké alakít.
+%Ezen kívül a QRadar reference data-i támogatják még az inputok különböző típusú validációját, valamint egy elévülési információ hozzárendelését. A típus validáció abban valósul meg, hogy beállítható a reference data-ban található adat típusa, és feltöltéskor a QRadar ezt validálja, valamint feldolgozza. A típusokra az alábbi lehetőségek állnak rendelkezésre: Alphanumeric, Alphanumeric ignore case, Numeric, IP, Port, Date. 
 
-Mindkét plusz funkció használatát támogatja a wrapper.
+Ezen kívül a wrapper kezeli az elévülési (TTL) paramétereket is, amelyek két részből tevődnek össze: az egyik az elévülés ideje, a másik típusa, vagyis milyen szabály alapján évüljenek el az adatok. Ennek a lehetséges értékei az UKNOWN, a LAST\_SEEN, és a FIRST\_SEEN, amik azt határozzák meg, hogy az elévülési időt honnan számoljuk: az adott adat először bekerülésének idejétől, vagy az utolsótól. Az elévülési időt szöveges formátumban (pl.: 36 hours) várja a QRadar API-ja, amit feldolgoz, és valós idő értékekké alakít.
+
+%Mindkét plusz funkció használatát támogatja a wrapper.
 
 \section{TDI Integráció megvalósítása}
 % Mod
@@ -70,9 +72,9 @@ Egy connector-nak nyolc működési módja lehet, amit a feljebb említett dokum
 	
 	\item Delta - Egy különleges mód, melyhez szükség van további, ilyen módot támogató elemekre az assembly line-on. A felolvasott adatokat összehasonlítja egy külső tárolóban (ún. delta store) tárolt elemekkel, és a két elem differenciáiból delta műveleteket képez, amiket végrehajt a célrendszeren. Eltárolja a kezelt elemek legutóbb használt verzióját, és csak az újonnan beolvasott elemekhez képesti különbséget hajtja végre.
 	
-	\item Server - Ebben a módban a connector egy szerver típusú viselkedést valósít meg, ahol vár egy bejövő kapcsolatra ( TCP, LDAP, HTTP, stb...), aminek a hatására egy új szálon elindítja a saját assembly line-ja egy másolatát, ami a beérkező adatokkal végrehajtja a feladatot, majd terminálódik. Az eredeti példány közben újabb kapcsolatokra vár.
+	\item Server - Ebben a módban a connector egy szerver típusú viselkedést valósít meg, ahol vár egy bejövő kapcsolatra (TCP, LDAP, HTTP, stb.), aminek a hatására egy új szálon elindítja a saját assembly line-ja egy másolatát, ami a beérkező adatokkal végrehajtja a feladatot, választ küld a bejövő kérésre, majd terminálódik. Az eredeti példány közben újabb kapcsolatokra vár.
 	
-	\item CallReply - Egy speciális mód, ami olyan interakciók végrehajtására lett tervezve, amiknél fontos az output műveletre adott válasz értéke, amit input értékként kezel, és dolgoz fel.
+	\item CallReply - Egy speciális mód, ami olyan interakciók végrehajtására lett tervezve, amelyeknél attribútumok transzformációját (vagy új attribútum előállítását) a connector által kezelt külső komponens végzi. Működése a lookup módhoz hasonló, azzal a különbséggel, hogy keresési kritérium helyett egy attribútumhalmazt halmazt adunk át, amelyen tetszőleges műveletet végrhajthat a külső komponens. A connector ilyenkor be- és kimenetei attribútumokkal is rendelkezik.
 \end{itemize}
 
 Egy connector nem feltétlenül támogat minden módot, a támogatni kívánt módok határozzák meg, hogy a fejlesztendő connector-nak milyen metódusokat kell implementálnia a megfelelő működéshez. 
@@ -80,18 +82,18 @@ Például az AddOnly mód csak az Initialize, putEntry, és a terminate metódus
 
 Első lépésként tehát elkészítettem egy QRadarReferenceDataConnector osztályt, ami örököl egy generikus ősosztályból, ami már előre megvalósít olyan metódusokat a TDI által használt ConnectorInterface-en, amelyek nem kifejezetten connector specifikusak, hanem generikus feladatokat látnak el, például konfigurációs fájlok beolvasása vagy paraméterek beállítása.
 
-Az implementációs döntések megértéséhez fontos ismerni egy connector életciklusát. A connector létrejöttekor meghívódik a konstruktora, de ez a dokumentációban leírtaknak megfelelően nem szabad hogy paraméter és egyéb beállításokat tartalmazzon, mert a példány már létrejöhet az előtt, hogy a szükséges paraméterek beolvasásra kerültek. Ez azért történhet meg, mert ezt a konstruktort használja a TDI grafikus felülete a kezdeti beállítási és paraméterezési felület elkészítéséhez. A konfiguráló, valamint az erőforrás foglaló műveletek ezért az Initialize metódusban kaptak helyet, ami az assembly line futás elején hívódik meg. A connector objektum egészen az assembly line végéig életben marad, majd az objektum törlődése előtt, lefut az terminate metódusa. Erre azért van szükség, hogy a connector megfelelően felszabadíthassa az általa foglalt erőforrásokat.
+Az implementációs döntések megértéséhez fontos ismerni egy connector életciklusát. A connector létrejöttekor meghívódik a konstruktora, de ez a dokumentációban leírtaknak megfelelően nem szabad, hogy paraméter és egyéb beállításokat tartalmazzon, mert a példány már létrejöhet az előtt, hogy a szükséges paraméterek beolvasásra kerültek. Ez azért történhet meg, mert ezt a konstruktort használja a TDI grafikus felülete a kezdeti beállítási és paraméterezési felület elkészítéséhez. A konfiguráló, valamint az erőforrás foglaló műveletek ezért az Initialize metódusban kaptak helyet, ami az assembly line futás elején hívódik meg. A connector objektum egészen az assembly line végéig életben marad, majd az assembly line lezárultakor lefut a terminate metódusa. Erre azért van szükség, hogy a connector megfelelően felszabadíthassa az általa foglalt erőforrásokat és a nyitott kapcsolatokat.
 
-A connector életciklus ismeretében, valamint a QRadar és a REST API-jának működése és telejsítménye miatt az megoldás mellett döntöttünk: az assembly line futása közben nem azonnal kerülnek fel az adatok a QRadar megfelelő reference data-jába, hanem azok először a connector egy változójában akkumulálódnak, és az életciklus végén, a terminate metódus segítségével kommitálódnak. Két ilyen változót használtam, egyet a törlendő, egyet az újonnan hozzáadandó elemek tárolására. A megvalósítás valamint a wrapper használata miatt adott volt, hogy ezeknek az akkumulátor változóknak a megvalósítását a QRadarApiWrapper mellé fejlesztett ReferenceData osztály, valamint leszármazottjai szolgáltassák.
+A connector életciklus ismeretében, valamint a QRadar és a REST API-jának működése és telejsítményének optimalizálása miatt úgy döntöttünk, hogy az assembly line futása közben nem azonnal kerülnek fel az adatok a QRadar megfelelő reference data-jába, hanem azok először a connector egy változójában akkumulálódnak, és az életciklus végén, a terminate metódus hívásakor kommitálódnak. Két ilyen változót használtam, egyet a törlendő, egyet az újonnan hozzáadandó elemek tárolására. A megvalósítás valamint a wrapper használata miatt adott volt, hogy ezeknek az akkumulátor változóknak a megvalósítását a QRadarApiWrapper mellé fejlesztett ReferenceData osztály, valamint leszármazottjai szolgáltassák.
 
 Az alábbi metódusokat implementáltam a connector által támogatott metódusokhoz:
 
 \begin{itemize}
-	\item initialize - Az inicializálást végrehajtó metódus. Lekéri az ősosztály segítségével a felületen megadott paramétereket és azokat megfelelő formátumra hozza, valamint inicializálja az olyan attribútumokat, amelyek a paraméterezés alapján más értékeket vehetnek fel. Emellett ha az opció használatban van, akkor létrehozza az új reference data-t.
+	\item initialize - Az inicializálást végrehajtó metódus. Alapértelmezetten az assmbly line indulásakor hívódik meg. Lekéri az ősosztály segítségével a felületen megadott paramétereket és azokat megfelelő formátumra hozza, valamint inicializálja az olyan attribútumokat, amelyek a paraméterezés alapján más értékeket vehetnek fel. Emellett ha az opció használatban van, akkor létrehozza az új reference data-t.
 	
-	\item findEntry - Keresést végrehajtó metódus. A megadott SearchCriteria alapján végrehajt egy keresést. A túlzott mértékű hálózati forgalom elkerülése végett ez a metódus egy gyorsítótárazási megoldást használ. Az első keresésnél lekérdezi a teljes reference data-t, majd ebben a lokális példányban keres az összes többi futása során. \todo indoklás
+	\item findEntry - Keresést végrehajtó metódus. A megadott SearchCriteria alapján végrehajt egy keresést a kiválaszott reference data elemein. Mivel a QRadar API nem definiál keresés műveletet, a keresést egy előzetesen letöltött teljes adathalmazon kell végrehajtani. Elkerülendő, hogy minden egyes findEntry híváskor újra le kelljen kérdezni a teljes adathalmazt, ez a metódus egy gyorsítótárazási megoldást használ. Az első keresésnél lekérdezi a teljes reference data-t, majd ebben a lokális példányban keres az összes többi futása során. 
 	
-	\item  putEntry - Hozzáadást végrehajtó metódus. A paraméterként kapott entry-t feldolgozza, és a connector számára értelmezett kulcsok (\textit{value},\textit{key},\textit{inner\_key}, \textit{payloaf}) mentén hozzáadja őket a megfelelő akkumulátorokhoz. Ha payload érkezik, amit egy az egyben továbbítunk a QRadar felé, akkor egy String-eket tartalmazó listához adja hozzá, ha key, value, inner\_key formátumban érkezik adat, akkor pedig a megfelelő reference data akkumulátorhoz.
+	\item  putEntry - Hozzáadást, azaz adat kiírást végrehajtó metódus. A paraméterként kapott entry-t feldolgozza, és a connector számára értelmezett kulcsok (\textit{value},\textit{key},\textit{inner\_key}, \textit{payloaf}) mentén hozzáadja őket a megfelelő akkumulátorokhoz. Ha payload érkezik, amit egy az egyben továbbítunk a QRadar felé, akkor egy String-eket tartalmazó listához adja hozzá, ha key, value, inner\_key formátumban érkezik adat, akkor pedig a megfelelő reference data akkumulátorhoz.
 	
 	\item modEntry - Módosítást végrehajtó metódus. Először feldolgozza a paraméterként kapott új entry-t, a régi entry-t, valamint a keresési feltételeket az alapján, hogy milyen típusú reference data-t kell módosítania. Ezután mind a négy típusra végrehajtja a szükséges lépéseket a sikeres módosításhoz. Ezek a következők:
 	\begin{itemize}
@@ -106,17 +108,18 @@ Az alábbi metódusokat implementáltam a connector által támogatott metóduso
 
 	\item deleteEntry - Törlésért felelős metódus. Feldolgozza a beérkező entry-t az alapján hogy milyen típusú reference data-t kezel, és hozzáadja a törlendő adatokat tartalmazó akkumulátorhoz.
 	
-	\item terminate - A connector terminálásáért, lezárásáért felelő metódus. Általában a felépített adatbázis kapcsolatokat zárja le, de jelen esetben ez a metódus végzi az akkumulátorok tartalmának feltöltését, valamint az ehhez szükséges előkészületeket (pl.: adatok előzetes kiürítése). Először feltölti az entry-ként érkező adatokat, majd a payloadokat küldi fel, és végül végrehajta a törlést a törlendő adatokkal.
+	\item terminate - A connector terminálásáért, lezárásáért felelős metódus. Általában a felépített adatbázis kapcsolatokat zárja le, de jelen esetben ez a metódus végzi az akkumulátorok tartalmának feltöltését, valamint az ehhez szükséges előkészületeket (pl.: adatok előzetes kiürítése). Először feltölti az entry-ként érkező adatokat, majd a payloadokat küldi fel, és végül végrehajta a törlést a törlendő adatokkal.
 	
-	\item querySchema - Segéd metódus, ami TDI grafikus felülete számára szolgáltat információkat. Ha még nincs felkonfigurálva a connector, vagy nem érhető el a QRadar megfelelő reference data-ja, akkor a TDI ezen a metóduson keresztül szerez tudomást arról, hogy a connector milyen attribútumneveket használ a beérkező entry-kben.
+	\item querySchema - Segéd metódus, ami TDI grafikus felülete számára szolgáltat információkat a connector által kezelt adatsémáról. Ha még nincs felkonfigurálva a connector, vagy nem érhető el a QRadar megfelelő reference data-ja, akkor a TDI ezen a metóduson keresztül szerez tudomást arról, hogy a connector milyen attribútumneveket használ a beérkező entry-kben.
+		
+	\item selectEntries - Iterator módnál használt metódus, ennek segítségével inicializálódik az adat, amit az Iterator mód végül entry-k formájában visszaad. Jellemzően egy adatlekérdezés, amely előállítja és cache-eli az adathalmazt, amely egyes elemein az assembly line végrehajtódik. Esetünkben a kiválasztott QRadar reference data elemiet kérdezi le és tárolja memóriában.
 	
-	\item populateCache - Belső működést segítő metódus, a keresésnél ez a metódus hívodik meg, ami letölti a megfelelő reference data-t.
-	
-	\item selectEntries - Iterator módnál használt metódus, ennek segítségével inicializálódik az adat, amit az Iterator mód végül entry-k formájában visszaad.
-	
-	\item getNextEntry - Iterator módnál használt metódus, egyesével visszaadja a megfelelő reference data-ban található rekordokat, entry-k formájába. Ehhez két iterátort használ, amik állapota két metódushívás között állandó marad. Az első iterátor végzi az iterációt az adatokon, vagy lépcsős adatok esetében a külső elemeken (map of maps és map of sets esetén a kuclsokon), a második pedig a belső kulcsokon / értékeken iterál.
+	\item getNextEntry - Iterator módnál használt metódus, egyesével visszaadja a megfelelő reference data-ban található rekordokat, entry-k formájában. Ehhez két iterátort használ, amelyek a selectEnries metódus által előállított adatokon iterál. Ezek állapota két metódushívás között állandó marad. Az első iterátor végzi az iterációt az adatokon, vagy összetett adatok esetében a külső elemeken (map of maps és map of sets esetén a kulcsokon), a második pedig a belső kulcsokon/értékeken iterál.
 	
 	\item getVersion - String formájában visszaadja a connector verzióját, amit a TDI használ fel.
+	
+	\item populateCache - Saját segédmetódus, nem része a TDI connector interfészének. A keresésnél ez a metódus hívodik meg, ami letölti a megfelelő reference data-t.
+
 \end{itemize}
 
 A connector használatához szükséges annak megfelelő felparaméterezése. Erre a TDI a grafikus fejlesztői felületén ad lehetőséget, ahol a connector által definiált paraméterek megadására beviteli mezők állnak rendelkezésre. Minden connectornak más paraméterekre van szüksége, ezt egy tdi.xml fájl megadásával írhatjuk le, amit a connector osztályt tartalmazó JAR fájlba csomagolunk be. Ezeket aztán a GUI segítségével megadhatjuk kézzel, paraméter fájl használatával, Javascript kóddal vagy helyettesítéssel, ami akár az aktuális entitás értékeit is felhasználhatja. Az általam fejlesztett connector-hoz én is elkészítettem egy ilyen xml fájlt, ami az alábbi paramétereket képes kezelni:
@@ -128,28 +131,28 @@ A connector használatához szükséges annak megfelelő felparaméterezése. Er
 \end{figure}
 
 \begin{itemize}
-	\item Hostname: URL amin keresztül elérhető a QRadar reference data API-ja 
+	\item Hostname (szöveges mező): URL amin keresztül elérhető a QRadar reference data API-ja 
 	
-	\item Authorization token: Token, amit a QRadarral való kapcsolódáskor az authentikációra használunk.
+	\item Authorization token (szöveges mező): Token, amit a QRadarral való kapcsolódáskor az autentikációra használunk.
 	
-	\item Reference data name: A reference data neve, amire az adatok feltöltésre kerülnek.
+	\item Reference data name (szöveges mező): A reference data neve, amire az adatok feltöltésre kerülnek.
 	
-	\item Reference type: A használni kívánt reference data típusa. Lehetséges értékei: Set, Map, MOS, MOM.
+	\item Reference type (legördülő lista): A használni kívánt reference data típusa. Lehetséges értékei: Set, Map, MOS, MOM.
 	
-	\item Data type: A reference data-ban tárolandó adatok típusa. Lehetséges értékei: Alphanumeric, Alphanumeric ignore case, Numeric, Date, IP, Port
+	\item Data type (legördülő lista): A reference data-ban tárolandó adatok típusa. Lehetséges értékei: Alphanumeric, Alphanumeric ignore case, Numeric, Date, IP, Port
 	
-	\item Create if doesn't exist: Igaz / hamis érték, azt befolyásolja, hogy a connector létrehozza e a reference data-t, ha az még nem létezik.
+	\item Create if doesn't exist (check-box): Igaz/hamis érték, azt befolyásolja, hogy a connector létrehozza-e a reference data-t, ha az még nem létezik.
 	
-	\item Purge before add (Add only): Feltöltés előtt törölje e a reference data tartalmát. Ez az opció csak AddOnly mód esetén jut érvénye.
+	\item Purge before add (Add only): Feltöltés előtt törölje-e a reference data tartalmát. Ez az opció csak AddOnly mód esetén jut érvénye.
 	
-	\item Timeout type: A Time to live paraméterben megadott értéket milyen módon értelmezze. Lehetséges értékei: None, UNKNOWN, LAST\_SEEN, FIRST\_SEEN. Azt befolyásolják, hogy honnantól 
+	\item Timeout type (legördülő lista): A Time to live paraméterben megadott értéket milyen módon értelmezze. Lehetséges értékei: None, UNKNOWN, LAST\_SEEN, FIRST\_SEEN. Azt befolyásolják, hogy honnantól 
 	számítson a time to live értéke.
 	
-	\item Time to live: Mennyi ideig legyen elérhető az adat, a timeout type alapján. Az időtartam szöveges formátumban várja az értéket. (pl \textit{"36 hours"})
+	\item Time to live (szöveges mező): Mennyi ideig legyen elérhető az adat, a timeout type alapján. Az időtartam szöveges formátumban várja az értéket. (pl \textit{"36 hours"})
 	
 	\item Comment: Milyen magyarázattal kerüljön feltöltésre az adat
 	
-	\item Detailed log: A connector futtatásakor a naplóinformációk extra információkat is tartalmazzanak e.
+	\item Detailed log (check-box): A connector futtatásakor a naplóinformációk extra információkat is tartalmazzanak e.
 	
 \end{itemize} 
 A QRadar connector működéséhez legalább a QRadar példány elérhetőségét, a hozzá tartozó token-t, a reference data nevét, típusát, valamint az általa használt adat típusát meg kell adni.
@@ -177,7 +180,7 @@ A  \ref{fig:conntest1}-es Ábrán látható, hogy egy Javascript blokk formájá
  
 A folyamat eredményességét, vagyis hogy az összes általam definiált szöveg felkerült e, a QRadar reference set módosító felületén keresztül ellenőriztem. Az végeredmény a \ref{fig:qradartest1} Ábrán látható. 
  
-A továbbiakban bemutatom egy egyszerűbb integrációs feladat megvalósítását, ami az ISIM-ben található árva account-okat szinkronizálja a QRadar számára. A feladat bővebb leírása, felhasználási területei a \ref{lbl:orphanaccs} fejezetben található. 
+A továbbiakban bemutatom egy példáb keresztül egy integrációs feladat megvalósítását, ami az ISIM-ben található árva account-okat szinkronizálja a QRadar számára. A feladat bővebb leírása, felhasználási területei a \ref{lbl:orphanaccs} fejezetben található. 
 
 \begin{figure}[h]
 	\centering
@@ -188,7 +191,7 @@ A továbbiakban bemutatom egy egyszerűbb integrációs feladat megvalósítás�
 
 Minden TDI assembly line két főbb részből áll: a Feed-ből és a Data Flow-ból. A Feed rész tartalmazza az olyan connectorok-at, amik iterator módban adatokat olvasnak fel, és ezekből új entry-ket készítenek az assembly line részére. Ezeken az entry-ken hajtódnak végre a Data Flow részben definiált connector-ok és script-ek által meghatározott műveletek.
 
-Jelen esetben a fő adatokat az ISIMLDAP connector szolgáltatja. Ez kapcsolódik az ISIM által használt LDAP szerverhez, és felolvassa az egyes account-okhoz tartozó információkat. A Feed-ben található másik két connector kiegészítő információk felolvasására szolgál. Ezek passzív módban vannak jelen, és az Assembly Line prolog script-je ezeket felhasználva olvas be plusz információkat. A configurationReader egy property fájlból olvas be adatokat a könnyebb paraméterezhetőség kedvéért, a serviceLSMappingReader pedig egy másik konfigurációs fájlból olvassa fel a service DN - QRadar log forrás név párosítást, amire ehhez a szinkronizációs feladathoz szükség van.
+Jelen esetben a fő adatokat az ISIMLDAP connector szolgáltatja. Ez kapcsolódik az ISIM által használt LDAP szerverhez, és felolvassa az árva account-okhoz tartozó információkat. A Feed-ben található másik két connector kiegészítő információk felolvasására szolgál. Ezek passzív módban vannak jelen, az Assembly Line prolog script-je ezeket felhasználva olvas be plusz információkat. A configurationReader egy property fájlból olvas be konfigurácós adatokat, a serviceLSMappingReader pedig egy másik konfigurációs fájlból olvassa fel a service DN -- QRadar log forrás név párosítást, amire azért van szükség, mert a QRadar a szabályokban logforrásneveket használ, ami nem feltétlenül ugyanaz. A külső konfigurácós fájlok használta azt teszi lehetővé, hogy ugyanaz az assembly line többféle konfiguárcóval is futtatható legyen, akár egyszerre, az assemly line módosítása nélkül.
 
 Az account információkat tartalmazó entitásokat a Data Flow rész dolgozza fel. A findServiceName egy lookup connector, amire az accountokban tárolt információk miatt van szükség. Ugyanis az ISIM LDAP-ja az egyes accountokhoz a service-t, amihez tartoznak, egy erservice attribútumban tárolja, egy DN\footnote{\href{https://www.ldap.com/ldap-dns-and-rdns}{Distinguished Name, az egész LDAP címtárban egyedi értékű attribútum}} formájában. A connector ezekhez a DN-ekhez keresi meg a beszédes nevet, amit a serviceLSMappingReader connector által felolvasott párosítás indexelésére használok fel. Ezzel összeáll minden szükséges információ a feltöltéshez.
 
