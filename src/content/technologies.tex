@@ -53,7 +53,7 @@ Minden reference data-nak van egy típusa, ami meghatározza hogy az adott halma
 	\item DATE - Dátumok, miliszekundomokban 1970.01.01 óta
 \end{itemize}
 
-Emellett a reference data-ban található adatoknak lehet egy TTL értéke is, ami meghatározza, hogy mennyi idő elteltével törlendő az adott adat. Ennek 3 típusa lehet: 
+Emellett a reference data-ban található adatoknak lehet egy time-to-live (TTL -- elévülési idő) értéke is, ami meghatározza, hogy mennyi idő elteltével törlendő az adott adat. Ennek 3 típusa lehet: 
 \begin{itemize}
 	\item UNKNOWN - \todo
 	\item LAST\_SEEN - Az adat utolsó feltöltésétől számítva kalkulálódik a TTL
@@ -85,7 +85,7 @@ A Tivoli Directory Integrator egy általános célú integrációs eszköz, ami 
 
 A TDI alapvető struktúrája úgynevezett assembly line-okból áll. Egy assembly line jelképez egy adat transzfert, a kezdeti adatok felolvasásától az átalakításokon át, a végső kimenet feltöltéséig. A ki- és bemeneti interakció ún. connectorokon keresztül történik, amelyek egy egységes interfészt implementálnak, és valamilyen külső adatforráshoz való kapcsolódást valósítanak meg. Minden connector, attól függően, hogy milyen műveletet végez 8 mód egyikében működik\footnote{A módok pontos leírása megtalálható a \ref{subsec:connimpl} szekcióban.}, valamint vagy aktív, vagy passzív módon dolgozik. Az előbbinél része az assembly line soros végrehajtásának, másikban nem, de külső vezérléssel működtethető.
 
-A legtöbb adatforrás eltérő formátumban kezeli az adatokat, így TDI minden be- valamint kimeneti műveletnél biztosít egy hozzárendelési lépést, amellyel megadhatjuk, hogy a külső attribútumok milyen belső attribútumokra legyenek leképezve. Ilyen ún. mapping lépést az assembly line-on bármikor végrehajthatunk, és emellett még számos átalakítási lépés áll rendelkezésre, mint például ciklusok vagy elágazások használata. Az assembly line-on haladó adatokat entry-k\footnote{\href{https://www.ibm.com/support/knowledgecenter/en/SSCQGF_7.1.0/com.ibm.IBMDI.doc_7.1/entryobject.htm}{A TDI Entry osztály leírása a hivatalos IBM dokumentációban.}} formájában kezeli a TDI. Egy entry egy elemi objektum, ami nevesített attribútumok halmazát képes tárolni. Ilyen entry-t bármelyik scriptben létre lehet hozni, de egy általános TDI assembly line esetén 4 darab nevesített entry-t használunk:
+A különböző adatforrások más-más formátumban kezelik az adatokat, így TDI minden be- valamint kimeneti műveletnél biztosít egy hozzárendelési lépést, amellyel megadhatjuk, hogy a külső attribútumok milyen belső attribútumokra legyenek leképezve. Ilyen ún. mapping lépést az assembly line-on bármikor végrehajthatunk, és emellett még számos átalakítási lépés áll rendelkezésre, mint például ciklusok vagy elágazások használata. Az assembly line-on haladó adatokat entry-k\footnote{\href{https://www.ibm.com/support/knowledgecenter/en/SSCQGF_7.1.0/com.ibm.IBMDI.doc_7.1/entryobject.htm}{A TDI Entry osztály leírása a hivatalos IBM dokumentációban.}} formájában kezeli a TDI. Egy entry egy elemi objektum, ami nevesített attribútumok halmazát képes tárolni. Ilyen entry-t bármelyik scriptben létre lehet hozni, de egy általános TDI assembly line esetén 4 darab nevesített entry-t használunk:
 
 \begin{itemize}
 	\item work: Az assembly line állandó entry-je. Ezen az objektumon keresztül utazik az adat az egyes komponensek között, valamint ezen hajtják végre az adatmódosító műveletket a connector-ok.
