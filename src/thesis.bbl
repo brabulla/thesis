@@ -26,7 +26,7 @@
   \bibEarlyBegin
 \else \let\bibEarlyEnd\relax \fi
 
-\begin{thebibliography}{}
+\begin{thebibliography}{1}
 \frenchspacing
 \makeatletter
 \global\def\bibIE@lowc{%
@@ -92,5 +92,36 @@
 \def\bibTechRep#1{Jelent\'{e}s}
 \def\bibInSelf#1{In u\H{o}: }
 \csname bibOverride\endcsname
+
+\bibitem{connectordev}
+https://www.ibm.com/support/knowledgecenter/en/SSCQGF_7.1.0/com.ibm.IBMDI.doc_7.1/referenceguide155.htm.
+
+\bibitem{qradardoc}
+IBM Knowledgebase:
+\bibNewBlock Ibm qradar technikai prezentációja.
+\bibNewBlock \url{https://www.ibm.com/us-en/marketplace/ibm-qradar-siem}.
+
+\bibitem{tdidoc}
+IBM Knowledgebase:
+\bibNewBlock Ibm qradar technikai prezentációja.
+\bibNewBlock
+  \url{https://www.ibm.com/support/knowledgecenter/en/SSCQGF_7.1.1/com.ibm.IBMDI.doc_7.1.1/pdguide09.htm}.
+
+\bibitem{isimdoc}
+IBM Knowledgebase:
+\bibNewBlock Ibm security identity manager technikai dokumentációja.
+\bibNewBlock
+  \url{https://www.ibm.com/support/knowledgecenter/en/SSRMWJ_6.0.0/com.ibm.isim.doc_6.0/ic-homepage.htm}.
+
+\bibitem{tdientry}
+IBM Knowledgebase:
+\bibNewBlock A tdi entry osztály leírása a hivatalos ibm dokumentációban.
+\bibNewBlock
+  \url{https://www.ibm.com/support/knowledgecenter/en/SSCQGF_7.1.0/com.ibm.IBMDI.doc_7.1/entryobject.htm}.
+
+\bibitem{wink}
+Apache software foundation:
+\bibNewBlock Apache wink.
+\bibNewBlock \url{https://cwiki.apache.org/confluence/display/WINK/Index}.
 
 \end{thebibliography}

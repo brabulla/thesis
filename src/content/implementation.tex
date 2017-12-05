@@ -29,7 +29,7 @@ Lehetséges lenne más formátumban tárolni az adatokat, mint például egy Jav
 
 A wrapper fejlesztése közben külön kihívást jelentett a QRadar REST api-val való kommunikáció megvalósítása. A QRadar ugyanis csak HTTPS forgalmat fogad el, TLS segítségével, ezért egy, a QRadar által generált tanusítványt kellett hozzáadni minden olyan környezethez, amely a wrappert használta. Ez a két külön architektúra esetén a WebSphere és a TDI tanusítvány könyvtárát jelentette, és ez egy olyan követelmény, ami a wrapper későbbi használata esetén is szükséges. Emellett a QRadar megköveteli, hogy a REST API-jához csatlakozó kliensek használjanak egy, a QRadar által előre generált token-t, amit minden híváskor fel kell küldeniük. A wrapper osztály ezt konstruktorában kéri, és automatikusan minden kérésnél elküldi. A TLS kapcsolat biztosítja a szerver hitelességét, míg a token a szerver számára hitelsíti az API-t használó klienst, így összeségében a kommunikáció kölcsönösen hitelesített.
 
-Magának a HTTP forgalomnak és a REST hívásoknak a lebonyolítására az Apache Wink\footnote{\hyperlink{Apache Wink}{\url{https://wink.apache.org}}} framework-öt használtam. Ez egy egyszerű Java alapú framework, melynek része egy JAX-RS kompatiblis szerver, és egy kifejezetten REST hívások lebonyolítására kiélezett HTTP kliens. A projektben a kliens komponens RestClient osztályát használtam, valamint a frameworkkel együtt érkező JSON4J csomagot, a JSON inputok parse-olására és a szöveges outputok generálására. A fejlesztés közben külön kihívást jelentett a JSON4J csomag megfelelő osztályainak használata, valamint egymásba ágyazása. Ez a csomag ugyanis két osztályt bocsájt rendelkezésre a JSONObject valamint a JSONArray formájában. Az object osztály reprezentálja a map típusú, míg az array a tömb típusú struktúrákat. Ez annyiban nehezítette a fejlesztést, hogy a különböző ReferenceData leszármazottak közt nem lehetett egységes parseolást használni, hanem a többszörösen egymásba ágyazott kollekciók esetén több lépcsős iterációt kellett használni a JSON felépítéséhez. Ez túl nagy adathalmazoknál lassabb működést eredményezhet.
+Magának a HTTP forgalomnak és a REST hívásoknak a lebonyolítására az Apache Wink\cite{wink} framework-öt használtam. Ez egy egyszerű Java alapú framework, melynek része egy JAX-RS kompatiblis szerver, és egy kifejezetten REST hívások lebonyolítására kiélezett HTTP kliens. A projektben a kliens komponens RestClient osztályát használtam, valamint a frameworkkel együtt érkező JSON4J csomagot, a JSON inputok parse-olására és a szöveges outputok generálására. A fejlesztés közben külön kihívást jelentett a JSON4J csomag megfelelő osztályainak használata, valamint egymásba ágyazása. Ez a csomag ugyanis két osztályt bocsájt rendelkezésre a JSONObject valamint a JSONArray formájában. Az object osztály reprezentálja a map típusú, míg az array a tömb típusú struktúrákat. Ez annyiban nehezítette a fejlesztést, hogy a különböző ReferenceData leszármazottak közt nem lehetett egységes parseolást használni, hanem a többszörösen egymásba ágyazott kollekciók esetén több lépcsős iterációt kellett használni a JSON felépítéséhez. Ez túl nagy adathalmazoknál lassabb működést eredményezhet.
 
 A wrapper a különböző reference data-k transzparens kezelésén túl egyéb funkciókat is ellát, mint például segéd funkciók biztosítása, vagy a hibák egységes kezelése. Ilyen segéd funkciók a különböző adattranszformációk a használt típusok és a JSON formátum között, vagy például különböző ellenőrzések egy reference data létezésére, vagy egy aszinkron törlés lefutására. A hibakezelés menedzselésére a wrapper egy saját kivétel osztályt definiál, ami minden, a sikeres lefutástól eltérő esetben (akár belső hiba, akár a QRadarral való kommunikáció közben fellépő hiba) eldobásra kerül. Ez az objektum tartalmaz egy szöveges üzenetet, ami a hiba okára utal, valamint egy státusz kódot, ami ha HTTP kommunikáció közbeni hiba történt, annak a kódját tartalmazza, ha belső működésbeli hiba (például parse-olási hiba) akkor egy 0-nál kisebb számot tartalmaz. Ez egységesen és könnyen használhatóvá teszi a felsőbb rétegek számára, ahol például logolást kezeljük, mert egyértelmű, hogy a hiba milyen forrásból adódott. A saját kivétel típus pedig tovább könnyíti a hibák elválasztását, főleg ha a wrapper-t egy nagyobb framework-ben használjuk.
 
@@ -52,7 +52,7 @@ A megvalósításhoz szükség volt elsősorban egy connector létrehozására, 
  
 \subsection{QRadar connector fejlesztése TDI-hoz}\label{subsec:connimpl}
 
-A TDI alapú megoldás első lépése egy connector fejlesztése volt a TDI és a QRadar közti integrációhoz. Ehhez segítségemre volt a hivatalos útmutató connector fejlesztéshez\footnote{\href{https://www.ibm.com/support/knowledgecenter/en/SSCQGF_7.1.0/com.ibm.IBMDI.doc_7.1/referenceguide155.htm}{Hivatalos útmutó az IBM weboldalán}}. 
+A TDI alapú megoldás első lépése egy connector fejlesztése volt a TDI és a QRadar közti integrációhoz. Ehhez segítségemre volt a hivatalos útmutató connector fejlesztéshez. \cite{conndev} 
 
 Egy saját connector fejlesztése TDI alatt abból áll, hogy létrehozunk egy új Java osztályt ami implementálja a megfelelő, TDI által specifikált interfészt, ennek metódusain belül elkészítjük a kívánt üzleti logikát. Majd készítünk egy xml alapú leíró fájlt, ami meghatározza a TDI számára, hogy a connector milyen paramétereket vár, azokat milyen formában, valamint a felhasználói felületen az egyes paraméterekhez milyen GUI elemek tartozzanak. Ezt a leírót, valamint a lefordított .class fájlokat a megfelelő struktúrában becsomagoljuk egy JAR fájlba, amit a TDI által használt könyvtárak egyikébe másolunk. 
 
@@ -311,36 +311,42 @@ A koncepció, valamint a fejlesztett megoldások tesztelésére az alábbi use-c
 \subsection{Inaktív felhasználókhoz tartozó fiókok}
 	A query célja azoknak a felhasználói fiókoknak az összegyűjtése, amiknek a tulajdonosa inaktív állapotban van, és egy set formájában feltölteni. Ezek olyan felhasználók, akiket az ISIM rendszerben felfüggesztettek.
 	\subsubsection{Felhasználása}
-		Egy felhasználó felfüggesztése általában valami jogvesztéssel járó procedúra során következik be, amikor nem biztos még a végkimenetel, de az időtartamára szeretnénk a felhasználót kivonni a rendszer által biztosított jogkörökből. 
-\laci A felfüggesztés legtöbbször végleges, ha valaki elmegy a cégtől akkor nem törlés, hanem suspend történik (lsd.~richard.lakatos1@ibm.com, etc...). Ha a person suspended, akkor már a végkimenetel biztos. Inkább az itt use-case, hogy valaki egy disabled account-ot kézzel újraaktivál, és a már inaktív ember nevében rosszalkodik. Vagy, ha konfig. hiba, vagy "mark only" mód miatt az ISIM nem inaktiválja az account-ot, annak ellenére, hogy a person inaktív, akkor aktív account-ja van inaktív embernek. Ezt kellene szépen leírni.
-\laci org unit-ra szűrés?
-		Ha azonban valamiért nem volt sikeres a kivonás, vagy a felhasználói fiókok felfüggesztése, akkor súlyos biztonsági rés keletkezhet a rendszerben.
+	
+		Egy felhasználó felfüggesztése általában valami jogvesztéssel járó procedúra során következik be, vagy ideiglenesen, amíg nem biztos például egy jogi eljárás végkimenetele, de az időtartamára szeretnénk a felhasználót kivonni a rendszer által biztosított jogkörökből, vagy véglegesen, ha például elmegy a cégtől, és már nincs szükség az adott személy rekord-ra, valamint account-okra a menedzselt rendszereken.
+		Ha azonban valamiért nem volt sikeres a kivonás, a felhasználói fiók felfüggesztése, vagy egy régebben felfüggesztett account-ot újra aktiválnak valahogy, akkor egy inaktív emberhez egy aktív account tartozik, ami súlyos biztonsági rés lehet egy rendszerben.
 
 		Ennek detektálására a SIEM biztonsági riasztást adhat, ha olyan tevékenység történik, ami a kigyűjtött, inaktív felhasználók fiókjaihoz kapcsolódik. Emellett ezek az adatok felhasználhatóak visszamenőleg is, például egy felelősségre vonási eljárásnál, egy adott személy historikus tevékenységének ellenőrzésére.
 		 
 	\subsubsection{Megvalósítás}
 		
-		\laci Itt is előbb írd le, hogy hol, melyik attribútum tárolja ezt. Ha lehet, tedd ide a filter-t is, úgy mint előbb. Legyen egyértelmű, hogy LDAP-ban keresünk.
-		Az inaktív felhasználókat az \textit{erpersonstatus} attribútum alapján szűröm, majd az eredményként kapott objektumok DN-jével létrehozok egy második filtert, ami az összes DN-t vagy kapcsolatban tartalmazza. Ennek segítségével szűrök az accountokat taralmazó organizációs egységen.
+		Egy felhasználó aktív/inaktív státuszát az \textit{erpersonstatus} attribútum tárolja, 0 értékként ha aktív, és 1-ként ha inaktív. A felhasználókat ezen attribútum alapján szűröm, majd az eredményként kapott objektumok DN-jével létrehozok egy második filtert, ami az összes DN-t vagy kapcsolatban tartalmazza. Ennek segítségével szűrök az accountokat tartalmazó organizációs egységen.
+		
+		A első felhasznált filter a következő:
+		\begin{lstlisting}
+(erpersonstatus=1)\end{lstlisting}
+		
+		majd ennek az eredményét felhasználva az alábbi mintára készítek egy másik filtert:
+		\begin{lstlisting}
+(&(objectclass=eraccountitem)(|(owner=$PERSON_DN1$)(owner=$PERSON_DN2$)...))\end{lstlisting} \label{code:accownerfilter}
+		ahol a \$PERSON\_DN\$-el jelöltem a ténylegesen behelyettesítendő, az előző filterből kapott személyekhez tartozó DN-eket.
 		
 \subsection{Felfüggesztési eljárás alatt álló felhasználók fiókjai}
-Az előző query-nél tárgyalthoz nagyon hasonló eset, de míg az előzőnél a már felfüggesztett, tehát a befejeződött folyamatú emberekre szűrünk, itt azokra, akiknél még zajlik az eljárás. Ez általában elég ritka, mivel a felfüggesztésnek pont az a lényege, hogy gyors, átmeneti jogvesztéssel jár, de megeshet, hogy például egy jóváhagyás miatt egy felfüggesztési eljárás nem fejeződik be.\footnote{Például egy másik, hasonlóan magas posztban álló manager emberét akarná felfüggeszteni, mert szabálysértésen kapta, de mivel azonos szervezeti szinten állnak, szükség van a jóváhagyásra a másik managertől, aki épp szabadságon van. Ekkor amíg vissza nem érkezik, addig áll a folyamat.}
-\laci vagy elképzelhető, hogy kommunikációs probléma, adapterhiba miatt nem sikerül azonnal inaktiválni az account-okat, ilyenkor is pending státuszban marada a processz
+Az előző query-nél tárgyalthoz nagyon hasonló eset, de míg az előzőnél a már felfüggesztett, tehát a befejeződött folyamatú emberekre szűrünk, itt azokra, akiknél még zajlik az eljárás. Ez általában elég ritka, mivel a felfüggesztésnek pont az a lényege, hogy gyors, atomi művelet, ami jogvesztéssel jár, de megeshet, hogy például kommunikációs, vagy adapter hiba miatt, vagy akár egy jóváhagyás miatt egy felfüggesztési eljárás nem fejeződik be.\footnote{Például egy másik, hasonlóan magas posztban álló manager emberét akarná felfüggeszteni, mert szabálysértésen kapta, de mivel azonos szervezeti szinten állnak, szükség van a jóváhagyásra a másik managertől, aki épp szabadságon van. Ekkor amíg vissza nem érkezik, addig áll a folyamat.}
 	\subsubsection{Felhasználása}
 		Az előző esethez hasonlóan itt is jogvesztés elmaradása áll fent, ami biztonsági réssel fenyeget. A SIEM riasztást adhat ezen felhasználói fiókok detektálásakor. 
 	\subsubsection{Megvalósítás}
-		Egy két lépcsős folyamatban előbb az adatbázisban keresek az alábbi utasítással:
+		Az egyik szűrő feltétel a folyamat állapota, ami a PROCESS táblában található a STATE oszlopban. A szűréshez használt értékek az 'R', 'I', 'S', amik sorrenben a Running, azaz futó, Interrupted, azaz megszakított, és Suspended, azaz felfüggesztett. A másik szűrő feltétel a process típusa, ami meghatározza hogy egy adott process ténylegesen mit hajt végre. Ez a PROCESS táblában a TYPE oszlopban található, és jelen esetben azok a folyamatok a fontosak, amik 'US' típusúak, azaz user suspend típusúak.
 		
-		\laci Szintén, előbb meséld el, hogy ott a PROCESS tábla, és ott a típus mező, ahol az US jelenti azt, ami minket érdekel, stb..
+		Ezek alapján az alábbi két lépcsős folyamatban keresek először az alábbi utasítással:
+		
 		\begin{lstlisting}
 Select REQUESTEE from PROCESS where type = 'US' and state in ('R','I','S')
 \end{lstlisting}
-		ami kiválasztja a folyamat célpontját (annak is a DN-jét), az összes olyan folyamatra, ami futó, felfüggesztett, vagy megszakított állapotban van, és a tíusa 'US', azaz User Suspend.
+		Ez kiválasztja a folyamat célpontját (annak is a DN-jét), az összes olyan folyamatra, ami futó, felfüggesztett, vagy megszakított állapotban van, és a tíupsa a már említett 'US'.
 		
-		Ezt követően az előző query-hez hasonlóan lekérem a személyekhez tartozó account-okat egy LDAP lekéréssel.
+		Ezt követően az előző query második lekérésével megegyező formában konkatenációval készítek egy LDAP filtert, ami megadja személyekhez tartozó account-okat.
 		
 \subsection{Törlési folyamat alatt álló felhasználói fiókok} 
-\laci Törlési vagy felfüggesztési legyen, mindenhol, ahol erről a use-case-ről beszélünk.
 Szintén az előző query-hez hasonló eset, csak itt a törlés alatt álló accountokat keressük. Feltöltés előtt egy transzformációt hajtok végre, amivel az account halmazokat egy QRadar logforráshoz rendelem, ezzel készítve egy map of sets-t.  
 	\subsubsection{Felhasználása}
 		Ha egy felhasználói fiók törlése nem történik meg azonnal, 
@@ -348,26 +354,31 @@ Szintén az előző query-hez hasonló eset, csak itt a törlés alatt álló ac
 		hanem például valamilyen kommunikációs hiba miatt megakad, akkor egy ablak nyílik a felhasználó számára, hogy azokat a jogosultságokat használja, amelyek a biztonsági házirend szerint már nem jár neki. Ezeknek a detektálására készíthetünk szabályokat a QRadarban, amik figyelik az ilyen típusú potenciális támadásokat, és jeleznek.
 		 
 	\subsubsection{Megvalósítás}
-	\laci Itt mindig 3 rész legyen. 1. Tényszerűen: hol az adat, ami érdekes, 2. Milyen módon kérdezed le (ez 1 alapján, lehet hogy triviális, de lehet, hogy van benne döntés), 3. (Opcionális) Konkrét filter/query 
-		Az adatbázisból lekérdezem a jelen pillanatban futó felhasználói fiók törlési folyamatokat. Ezt a Process táblában való kereséssel teszem, az olyan folyamatokra, amelyek állapota futó, felfüggesztett vagy megszakított. Emellett szűrök a process típusára is, ami jelen esetben 'AD', vagyis Account Delete. Ezekből a kapott adatokból a Subject mezőt felhasználva megkapom az account nevét, a Subject\_service mezóvel pedig a service-t, amihez tartzoik. Utolsó lépésként elvégzek egy map lépést, egy előre definiált párosítás alapján, ami QRadar logforrás neveket rendel a megfelelő account-ok halmazához.
+		A törlési folyamattal kapcsolatos szükséges információkat a PROCESS tábla tárolja. A szükséges folyamatok összegyűjtéséhez először lekérem a  táblából azokat a rekordokat, amiknek a STATE értéke 'R','I', vagy 'S', és a TYPE értéke 'AD', azaz account delete. Ezeknek a rekordoknak a SUBJECT mezőjében megtalálható az érintett account neve, valamint a SUBJECT\_SERVICE mezőben pedig annak a servicenek a neve, amelyikhez tartozik.
+		
+		Utolsó lépésként egy külső fájlból betöltött QRadar logforrás - Service name hozzárendeléssel a felolvasott SUBJECT\_SERVICE alapján végrehajtom a mappelést, és így előállnak a szükséges map of set-ek.
 	
 \subsection{Árva fiókok } \label{lbl:orphanaccs}
-Az árva fiókok olyan fiókok, melyek nem köthetők valós, a rendszerben kezelt személyhez. Ilyenek lehetnek például a rendszer által menedszelt technikai fiókok, vagy olyanok, amik korábban valós felhasználókhoz tartoztak, de valamiért megmaradtak a szétválás után is. 
+Az árva fiókok olyan fiókok, melyek nem köthetők valós, a rendszerben kezelt személyhez. Ilyenek lehetnek például a rendszer által menedszelt technikai fiókok, vagy olyanok, amik korábban valós felhasználókhoz tartoztak, de valamiért megmaradtak a szétválás után is, vagy olyanok, amiket nem az ISIM-en keresztül, hanem annak megkerülésével vettek fel a menedzselt rendszeren. 
 	\subsubsection{Felhasználása}
  	Az árva fiókok jelenléte komoly biztonsági rést jelenthetnek, elsősorban ha például hozzáférnek kritikus rendszerekhez, de megmaradt a alapértelmezett jelszavuk, vagy nem alkalmazták rájuk a megfelelő jelszó házirendeket, ezért fontos lehet, hogy tudjuk detektálni ezeknek a fiókoknak az összes tevékenységét, mert bármelyik fenyegetést jelenthet.
-	\laci árva fiók lehet továbbá a ISIM-et megkerülve létrehozott fiók, amely szintén a biztonsági kockázat
 	\subsubsection{Megvalósítás}
 	Az ISIM az LDAP adatbázisában ezeket a fiókokat egy külön LDAP részfában egységben tárolja, így elég azt lekérnem. Ezt egy LDAP filterrel végzem, az így kinyert account-okat egy előre definiált map alapján hozzárendelem a megfelelő service-hez, és annak a QRadar szerinti log forrás azonosítójához.
 	
 \subsection{Megadott csoportokba tartozó felhasználói fiókok, menedzselt rendszer szerint}		
 A query célja az összes felhasználói fiók összegyűjtése egy menedzselt rendszerről, és az adott rendszeren való csoporttagságuk alapján egy map of setsbe rendezése. A query megvalósításánál külön kihívást jelentett, hogy az egyes accountok más attribútum névvel tárolják a csoportot jelző attribútumot, így azt is külön ki kellett keresni.
 	\subsubsection{Felhasználása}
-		A legtöbb informatikai rendszeren létezik valamilyen felhasználói fiók csoportosítás, ami többnyire az azonos jogkörrel rendelkező fiókokat definiálja. Ha megvannak egy adott csoportba tartozó fiókok nevei, akkor könnyen létrehozhatunk irregularitás detektáló szabályokat, mint például ha a privilegizált felhasználók munkaidőn kívül lépnek be, ami jelentheti akár a fiókjuk kompromittálódását is. Ehhez azért van szükség a csoportokra, mert gyakran hasznos, ha tudjuk szűrni, hogy pontosan kiknek, vagy milyen jogkörrel rendelkező felhasználókat figyelünk.
-		\laci Ebből úgy tűnik, mintha egy fiók csak egy csoportba tartozhatna, de ez nincs így. A csoporttagság valamilyen jogosultsággal jár általában
+		A legtöbb informatikai rendszeren létezik valamilyen felhasználói fiók csoportosítás, ami bizonyos jogköröket definiál a beléjük tartozó fiókokra,s a csoporttagságok alapján összeáll, hogy egy fiók milyen jogokkal rendelkezik az adott rendszeren. 
+		
+		Az egyes jogkörök általában különböző mértékben jelentenek veszélyt, ha nem megfelelő kezekbe kerülnek, így ha megvannak az adott csoportba tartozó fiókok nevei, akkor könnyen létrehozhatunk szabályokat, amiket a súlyosság szerint testreszabhatunk az alapján, hogy milyen jogokkal bírnak a fiókok, és ez milyen mértékben jelent veszélyt.
 		 
+		Ilyen szabály lehet például ha a privilegizált felhasználók munkaidőn kívül lépnek be, ami jelentheti akár a fiókjuk kompromittálódását is, ami széles jogkörökkel lényegesen nagyobb veszélyt jelenthet, mintha például egy végfelhasználó fiókja sérülne.
+		
 	\subsubsection{Megvalósítás}
-	\laci Ide nagyon hiányzik a mese, hogy miért nem lehet egyszerűen a groupName attribútumra szűrni?
-		Egy LDAP szűréssel lekérdezem a kijelölt service-hez tartozó account-okat és az összes attribútumukat, valamint a service típusán keresztül, majd a definíciója segítségével lekérem a rajta található account-ok csoport attribútumának nevét. Az accountokat ezután összerendelem a csoportok szerint, és elkészítem a map of sets-et.
+
+		Az ISIM az alábbi architektúrát használja a service-ek és az accountok kezelésére: Minden service rendelkezik egy service profile-al, ami leírja, hogy egy service típus milyen attribútumokal rendelkezik, plusz egyéb technikai információkat tárol. Ez egy attribútum formájában adja meg, hogy a rajta található account-ok milyen típusúak, azaz milyen account profile definiálja őket. Az egyes service-ekhez tartozó accountokon definiálva van egy csoportosítás, amit group-oknak nevezünk, és egy, az accounton található, többértékű attribútum értéke tartalmazza. Ennek az attribútumnak a neve azonban minden account típusra más, és ezt a nevet az egyes accountokhoz tartozó service profile-ok tartalmazzák.
+		
+		Ezért a megvalósításhoz egy LDAP szűréssel lekérdezem a kijelölt service-hez tartozó account-okat és az összes attribútumukat. Majd a service típusán keresztül, a service profileból lekérem a rajta található account-ok csoport attribútumának nevét. Az accountokat ezután összerendelem a csoportok szerint, és elkészítem a map of sets-et.
 	
 	
 \section{QRadar esemény küldő és feldolgozó fejlesztése}
@@ -444,12 +455,9 @@ Az összeállított üzenetek eseménnyé alakításához definiáltam egy sajá
 	ATTRIBÚTUM_NÉV=(.*?[^\\]);
 \end{lstlisting}
 
-Ennél a reguláris kifejezésnél az attribútum értéke pontosan az első találati csoportban érhető el, amibe minden karakter beletartozik, ami az attribútum nevet követő egyenlőség jel, és az első olyan pontosvessző között található, ami előtt nem backslash áll. Ezen kifejezésekkel sikerült feldolgoznom az összes lehetséges beérkező property-t, amiből a fontosabbak listája megtekinthető a \ref{tab:properties} táblázatban, valamint az összes a \ref{tab:allprops} táblázatban. A feldolgozott esemény a felolvasott property-kkel a QRadar felületén a \ref{fig:dsmproperties} ábrán látható.
+Ennél a reguláris kifejezésnél az attribútum értéke pontosan az első találati csoportban érhető el, amibe minden karakter beletartozik, ami az attribútum nevet követő egyenlőség jel, és az első olyan pontosvessző között található, ami előtt nem backslash áll. Ezen kifejezésekkel sikerült feldolgoznom az összes lehetséges beérkező property-t, amiből a fontosabbak listája megtekinthető a \ref{tab:properties} táblázatban, valamint az összes a függelék \ref{tab:allprops} táblázatában. A feldolgozott esemény a felolvasott property-kkel a QRadar felületén a \ref{fig:dsmproperties} ábrán látható.
 
-
-% Table generated by Excel2LaTeX from sheet 'Sheet1'
-% Table generated by Excel2LaTeX from sheet 'Sheet1'
-\begin{table}[htbp] \label{tab:properties}
+\begin{table}[!htbp] 
 	\centering
 	\caption{Szemelvény a feldolgozott esemény property-kből.}
 	\begin{tabular}{lp{10cm}}
@@ -467,8 +475,7 @@ Ennél a reguláris kifejezésnél az attribútum értéke pontosan az első tal
 		P\_TYPE & 2 karakteres kódja a process típusának. Pl: új felhasználó (UA), jelszóváltoztatás (AP). \\
 		PL\_REQUESTOR & Igénylő neve felhasználókkal kapcsolatos eseményeknél \\
 	\end{tabular}%
-
-	\label{tab:addlabel}%
+\label{tab:properties}
 \end{table}%
 
 
