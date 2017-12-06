@@ -93,8 +93,11 @@
 \def\bibInSelf#1{In u\H{o}: }
 \csname bibOverride\endcsname
 
-\bibitem{connectordev}
-https://www.ibm.com/support/knowledgecenter/en/SSCQGF_7.1.0/com.ibm.IBMDI.doc_7.1/referenceguide155.htm.
+\bibitem{conndev}
+IBM Knowledgebase:
+\bibNewBlock Hivatalos útmutó tdi connector fejlesztéshez.
+\bibNewBlock
+  \url{https://www.ibm.com/support/knowledgecenter/en/SSCQGF_7.1.0/com.ibm.IBMDI.doc_7.1/referenceguide155.htm}.
 
 \bibitem{qradardoc}
 IBM Knowledgebase:
@@ -113,15 +116,32 @@ IBM Knowledgebase:
 \bibNewBlock
   \url{https://www.ibm.com/support/knowledgecenter/en/SSRMWJ_6.0.0/com.ibm.isim.doc_6.0/ic-homepage.htm}.
 
+\bibitem{qradarssl}
+IBM Knowledgebase:
+\bibNewBlock Qradar ssl konfigurációja.
+\bibNewBlock
+  \url{https://www.ibm.com/support/knowledgecenter/en/SSCQG_7.1.1/com.ibm.IBMDI.do_7.1.1/adminguide36.htm}.
+
 \bibitem{tdientry}
 IBM Knowledgebase:
 \bibNewBlock A tdi entry osztály leírása a hivatalos ibm dokumentációban.
 \bibNewBlock
   \url{https://www.ibm.com/support/knowledgecenter/en/SSCQGF_7.1.0/com.ibm.IBMDI.doc_7.1/entryobject.htm}.
 
+\bibitem{slf4j}
+Quality~Open Software:
+\bibNewBlock Slf4j dokumentáció.
+\bibNewBlock
+  \url{https://www.ibm.com/support/knowledgecenter/en/SSCQG_7.1.1/com.ibm.IBMDI.do_7.1.1/adminguide36.htm}.
+
 \bibitem{wink}
 Apache software foundation:
 \bibNewBlock Apache wink.
 \bibNewBlock \url{https://cwiki.apache.org/confluence/display/WINK/Index}.
+
+\bibitem{ldapdn}
+Unknown:
+\bibNewBlock Ldap dns and rdns.
+\bibNewBlock \url{https://www.ldap.com/ldap-dns-and-rdns}.
 
 \end{thebibliography}

@@ -1,11 +1,18 @@
 \chapter{Összefoglalás}
 \label{ch:sum}
-A féléves munkám során a következő feladatokat végeztem el:
 
+Jelen dolgozat kiindulási problémáját az adta, hogy az IT biztonság területén használt SIEM, az IBM Security QRadar felhasználási lehetőségeit kibővítsük egy Idm, az IBM Security Identity Manager segítségével. A konkrét cél az volt, hogy a két termék közti integrációt egyedi megoldásokkal támogassuk, és az ISIM-ben elérhető, felhasználókkal kapcsolatos adatokat és folyamat információkat felkínáljuk a QRadar számára. Ezek segítségével elsősorban potenciálisan veszélyes tevékenységek detektálhatók az ISIM által kezelt menedzselt rendszereken, valamint az ISIM folyamatain belül.
+
+Az integráció megvalósításához két módszert definiáltunk:
 \begin{itemize}
-	\item Megismerkedtem az IdM és a SIEM területekkel.
-	\item Tanulmányoztam és tapasztalatot szereztem az IBM IdM és SIEM megoldásaival, továbbá a TDI és WAS szoftverekkel.
-	\item Kidolgoztam a projekt többi résztvevőjével két rendszer integrációjának lehetséges architektúráját és technikai részleteit.
-	\item Megvalósítottam egy általánosan használható QRadar Java API-t, amely a QRadar REST API-jának az integráció szempontjából releváns részét Java programozói környezetben teszi elérhetővé.
-	\item Fejlesztettem egy TDI connector-t, amely a TDI segítségével megvalósuló integráció alapja, és egyben egy általánosan használható eszköz QRadar reference adatok kezelésére más, TDI-vel megvalósított integrációs feladatokra is.
+	\item Releváns felhasználói adatok összegyűjtése és feltöltése a QRadar szabályrendszere számára.
+	\item ISIM folyamat információiból események generálása, és ezek elküldése a QRadar számára.
 \end{itemize}
+
+A munkám előtt rendelkezésre állt már egy QRadar bővítmény, ami képes kezelni az ISIM-ből érkező audit események egy részhalmazát, ám ez nem volt felkészítve azokra a folyamat információkat tartalmazó események feldolgozására, amiket az általam készített megoldás kezel. Az általam megvalósított rendszer az IBM Tivoli Directory Integrator-t használja a betöltés, a generálás és a felküldés végrehajtására, és a felhasznált adatokat a konkrét ISIM folyamatokból gyűjti össze. Ezekből egy syslog sort generálnak, amit a QRadar egy általam definiált esemény típussá dolgoz fel, ami miatt ezek további feldolgozása már a QRadarban elérhető módszerekkel elvégezhető.
+
+A munkám előtt ISIM felhasználói adatainak integrációjára nem volt még kidolgozott megoldás, így ez egy teljesen új funkcionalitást biztosít. A felhasználói adatok feltöltéséhez a QRadar reference data adattárolóit használom, szintén a QRadar által biztosított REST API-on keresztül. Ez a feltöltési folyamat egy biztonságos, TLS titkosított csatornán keresztültörténik, aminél az applikációt egy API token hitelesíti a QRadar felé. A tényleges feltöltéshez készítettem egy Java wrapper osztályt, ami egy egyszerű, és könnyen használható interfészt biztosít a Qradar összes reference data típusának használatához, valamint könnyen kezelhetővé teszi az egyes plusz funkciók használatát is.
+
+A feltöltő alkalmazás konkrét megvalósításához két architektúrát definiáltunk és valósítottunk meg, az egyik az IBM Tivoli Directory Integrator nevű adatintegrációs eszközt és framework-öt használja, a másik pedig egy Java webalkalmazás, ami IBM WebSphere alkalmazásszerveren fut. A TDI alapú megoldásnál én készítettem el az integrációhoz szükséges connectort a QRadar felé, valamint a minta integrációs feladatok egy részét.  Mivel a fejlesztés egy projekt keretében zajlott, és a TDI alapú és a WebSphere alapú megoldás párhuzamosan készült, ezért a Websphere alapú fejlesztésében csak a tervezési fázisban, a tesztelési fázisban, valamint az integrációs feladatok fejlesztésében vettem részt.
+
+A fejlesztési folyamat eredményeként létrejött három megoldás, amik támogatják a leírt adatintegrációs feladatokat mind alkalmankénti futtatás, mint ütemezett, rendszeres futtatás esetén.

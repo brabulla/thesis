@@ -8,12 +8,15 @@ A telepítés és a használat leírásának során feltételezem, hogy már fel
 	\item WebSphere liberty 17.0.0.2
 \end{itemize}
 
+
+
 \section{TDI alapú integrációs modul}
 A megoldás általam készített része egy wrapper, a hozzá tartozó segédosztályokkal, valamint egy TDI connector implementáció, ami a wrapperre épül. A wrapper önmagában is felhasználható más projektekben. A connector egy .jar formájában használható fel, amit a megfelelő TDI installáció \$INSTALL\_DIR\$/jars/connectors mappájába bemásolva használhatunk fel. 
-\subsection{Dependenciák}
-A wrapper a HTTP hívások bonyolítására az Apache Wink \footnote{\href{https://wink.apache.org/}{Apache Wink hivatalos oldala: https://wink.apache.org/}} framework-öt használja, így ezen a library-n kívül szükség van ennek a dependenciáira is, mint például a J2EE bővítményekre.
+\subsection{Dependenciák} \label{subsec:wrapdep}
+A wrapper a HTTP hívások bonyolítására az Apache Wink\cite{wink} framework-öt használja, így ezen a library-n kívül szükség van ennek a dependenciáira is, mint például a J2EE bővítményekre.
 
-A wrapper ezen kívül logolásra az SLF4J\footnote{\href{https://www.slf4j.org/}{SLF4J hivatalos oldala: https://www.slf4j.org/}} könyvtárat használja.
+A wrapper ezen kívül logolásra az SLF4J könyvtárat használja.\cite{slf4j}
+%\footnote{\href{https://www.slf4j.org/}{SLF4J hivatalos oldala: https://www.slf4j.org/}}
 
 Mivel a QRadar irányú kapcsolat SSL titkosított és ehhez 2048 bites kulcsot használ, valamint DHE kulcscserét, ezért bizonyos java verziók esetén hibák léphetnek fel az SSL Handshake folyamán
 \footnote{\href{https://stackoverflow.com/questions/6851461/java-why-does-ssl-handshake-give-could-not-generate-dh-keypair-exception}{Megoldások 1.6-os Java esetén: https://stackoverflow.com/questions/6851461/java-why-does-ssl-handshake-give-could-not-generate-dh-keypair-exception}} \footnote{\href{https://developer.ibm.com/answers/questions/209245/ssl-exception-error-in-wesphere-application-server.html}{Megoldás 1.6-os Java és IBM WebSphere használata esetén: https://developer.ibm.com/answers/questions/209245/ssl-exception-error-in-wesphere-application-server.html}}.
@@ -24,13 +27,53 @@ Ajánlott a Java 1.7-es verzióját használni, amiben ezek már javítva vannak
 \subsubsection{Fordítás}
 Ha csak forráskód áll rendelkezésre, akkor szükséges a projekt lefordítása, és egy .jar fájlba csomagolása. A fordításhoz szükségesek a fent felsorolt dependenciák elérhetővé tétele, valamint kettő, a TDI által biztosított .jar fájl: \textit{miserver.jar} és \textit{miconfig.jar}. Ezek megtalálhatók a \textit{\$TDI\_INSTALL\$/jars/common} mappában. 
 Az elkészült jar fájl tartalmazza a fordított .class fájlokat a megfelelő mappa struktúrában, valamint a gyökérkönyvtárban a \ref{subsec:connimpl}. fejezetben leírtaknak megfelelően elkészített tdi.xml-t.
+
 \subsubsection{TDI oldali konfiguráció}
 Ahhoz, hogy a TDI használni tudja a connector-t, az elkészített .jar fájlt be kell másolni a \textit{\$TDI\_INSTALL\$/jars/connectors} mappába, valamint a szükséges dependenciákat a \textit{\$TDI\_INSTALL\$/jars/3rdparty/others} mappába.
+\subsection{Kommunikációs beállítások}
 
-\subsection{SSL titkosítás beállítása}
-Mivel a QRadar SSL titkosítást használ, amihez egy self-signed certificate-el rendelkezik, ezt a certificate-et hozzá kell adni a TDI által használt SSL keystore-okhoz. Erre a feladatra ajánlott a TDI-al együtt érkező Java installáció által biztosított Ikeyman\footnote{Elérési út: \textit{\$TDI\_install\_dir\$/jvm/jre/bin}} grafikus alkalmazás használata. A két keystore, amihez a kulcsokat hozzá kell adni a \textit{\$TDI\_install\_dir\$/testserver.jks} valamint a \textit{\$TDI\_install\_dir\$/serverapi/testadmin.jks} \footnote{\href{https://www.ibm.com/support/knowledgecenter/en/SSCQG\_7.1.1/com.ibm.IBMDI.do\_7.1.1/adminguide36.htm}{A procedúráról bővebb leírás található az alábbi linken: https://www.ibm.com/support/ knowledgecenter/en/SSCQG\_7.1.1/com.ibm.IBMDI.do\_7.1.1/adminguide36.htm}}.
+\subsubsection{SSL titkosítás beállítása}
+Mivel a QRadar SSL titkosítást használ, amihez egy self-signed certificate-el rendelkezik, ezt a certificate-et hozzá kell adni a TDI által használt SSL keystore-okhoz. Erre a feladatra ajánlott a TDI-al együtt érkező Java installáció által biztosított Ikeyman\footnote{Elérési út: \textit{\$TDI\_install\_dir\$/jvm/jre/bin}} grafikus alkalmazás használata. A két keystore, amihez a kulcsokat hozzá kell adni a \textit{\$TDI\_install\_dir\$/testserver.jks} valamint a \textit{\$TDI\_install\_dir\$/serverapi/testadmin.jks}.\cite{qradarssl}
 
-\subsubsection{QRadar oldali beállítás}
+\subsubsection{Engedélyezett alkalmazás felvétele a QRadar oldalán }
 A TDI connector - QRadar irányú authentikáció biztosításához szükséges egy QRadar API kulcs. Ezt a QRadar webes admin felületén, az \textit{Admin -> User Management -> Authorized Services} menüpont alatt található. Itt egy új rekord felvétele és felkonfigurálása után, az Authentication Token mezőben található token-t használva a connector felkonfigurálásához létrehozható a kapcsolat a REST API-val. 
+
+Amennyiben biztonsági szempontból szükséges, beállítható, hogy a kulcsot használó applikációk milyen csoport tagsággal rendelkezzenek, valamint a hozzáférés elévülési ideje. A csoport tagság definiálja azt, hogy pontosan milyen típusú operációkhoz fog hozzáférni az alkalmazás, ezért fontos, hogy a connector által használt tokenhez tartozó csoport tudja írni és olvasni is a reference data-kat.
+
+\subsection{Használat}
+
+\section{Websphere alapú alkalmazás}
+\subsection{Dependenciák}
+Az alkalmazás egy Java EE webalkalmazás, amely WebSphere alkalmazásszerverre lett tervezve, azon belül pedig a WebSphere Liberty változatára. Mivel csak ezen lett tesztelve, ezért más alkalmazásszerver nem támogatott, de apróbb változtatásokkal valószínűleg más szerveren is futtatható, de a leírásnak nem célja egy mindenre kiterjedő útmutatót adni. 
+
+A teszteléshez 17.0.0.2-es Liberty installációt használtam, valamint fontos, hogy a Liberty szerver támogassa, és legyenek telepítve az alábbi beépülők: webProfile-7.0, localConnector-1.0, jsp-2.3, jca-1.7, concurrent-1.0, appSecurity-2.0, servlet-3.1, passwordUtilities-1.0, distributedMap-1.0.
+
+Az ütemezéshez az alkalmazás a commonj \cite{commonj} könyvtárat használja, így ezt is elérhetővé kell tenni a szerver számára. 
+
+Mivel ez az alkalmazás is az általam készített wrappert használja a QRadarral való kommunikációra, ezért a \ref{subsec:wrapdep}-ben leírtaknak megfelelően annak a dependenciáira is szükség van, nevezetesen az SLF4J könyvtárra, és az Apache Wink könyvtár megfelelő részeire.
+
+Az alkalmazás működéséhez továbbá szükség van a megfelelő verziójú DB2-es Java driverre\footnote{A megfelelő verzió jelen esetben azt jelenti, hogy a felhasznált driverek az adott, felhasznált DB2 instanciának megfelelő driverek kell hogy legyenek} és licenszre, amiket az alkalmazás az ISIM adatbázisaihoz, valamint a saját adatbázisaihoz való kapcsolódásra használ. Ezeket egy library formájában fel kell venni a Liberty szerver definíciós XML-jébe, továbbá a megfelelő adatbázisokat a hozzájuk tartozó authentikációs adatokkal dataSource-ként.\cite{wsdatasource}
+
+Ezen kívül szükséges a szerver konfigurációs állományába felvenni / módosítani az alábbi adatokat:
+\begin{itemize}
+	\item distributedMap \cite{dynacache} : Az alkalmazás által használt DynaCache definíciója 
+\end{itemize}
+
+%
+%\begin{itemize}
+%	\item webProfile-7.0
+%	\item localConnector-1.0
+%	\item jsp-2.3 - A weblapok megjelenítéséhez.
+%	\item jca-1.7
+%	\item concurrent-1.0 - A feladatok ütemezéséhez
+%	\item appSecurity-2.0
+%	\item servlet-3.1
+%	\item passwordUtilities-1.0 - Az alkalmazás által használt technikai jelszavak kezeléséhez
+%	\item distributedMap-1.0 - Az alkalmazás által használt DynaCache cache-elési módszerhez.
+%\end{itemize}
+
+\subsection{Telepítés}
+
+\subsection{Használat}
 
 % mit hova másoljunk, cert hozzáadása a megfelelő storehoz, stb

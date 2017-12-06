@@ -19,55 +19,50 @@ Reallocated glb_str_end (elt_size=4) to 20 items from 10.
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Database file #1: bib/mybib.bib
-I was expecting a `,' or a `}'---line 43 of file bib/mybib.bib
- :  
- :  title ={Hivatalos útmutó TDI connector fejlesztéshez},
-(Error may have been on previous line)
-I'm skipping whatever remains of this entry
-Warning--to sort, need author/key/name in connectordev
+Warning--I didn't find a database entry for "multilnesyslog"
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
-You've used 6 entries,
+You've used 9 entries,
             4991 wiz_defined-function locations,
-            1144 strings with 12375 characters,
-and the built_in function-call counts, 9258 in all, are:
-= -- 1637
-> -- 36
+            1156 strings with 12697 characters,
+and the built_in function-call counts, 14463 in all, are:
+= -- 2584
+> -- 63
 < -- 0
-+ -- 624
-- -- 20
-* -- 164
-:= -- 402
-add.period$ -- 11
-call.type$ -- 6
-change.case$ -- 22
++ -- 992
+- -- 36
+* -- 229
+:= -- 648
+add.period$ -- 18
+call.type$ -- 9
+change.case$ -- 36
 chr.to.int$ -- 0
-cite$ -- 7
-duplicate$ -- 1300
-empty$ -- 263
-format.name$ -- 10
-if$ -- 1922
+cite$ -- 9
+duplicate$ -- 2054
+empty$ -- 397
+format.name$ -- 18
+if$ -- 3017
 int.to.chr$ -- 0
-int.to.str$ -- 6
+int.to.str$ -- 9
 missing$ -- 0
-newline$ -- 124
-num.names$ -- 10
-pop$ -- 361
+newline$ -- 141
+num.names$ -- 18
+pop$ -- 557
 preamble$ -- 1
-purify$ -- 17
+purify$ -- 27
 quote$ -- 22
-skip$ -- 100
+skip$ -- 153
 stack$ -- 0
-substring$ -- 1004
-swap$ -- 961
+substring$ -- 1585
+swap$ -- 1530
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 30
-warning$ -- 1
-while$ -- 47
-width$ -- 7
-write$ -- 143
-(There was 1 error message)
+type$ -- 45
+warning$ -- 0
+while$ -- 81
+width$ -- 10
+write$ -- 174
+(There was 1 warning)
