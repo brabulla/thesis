@@ -8,12 +8,12 @@
 %----------------------------------------------------------------------------
 \chapter*{Kivonat}\addcontentsline{toc}{chapter}{Kivonat}
 
-Az informatika fejlődésével és terjedésével egyre fontosabb terület lesz az informatikai biztonságtechnika ami rengeteg szerteágazó feladatot foglal magába. Jelen dolgozat ezen belül kettő területre, a biztonsági incidensek és események kezelésére, valamint a felhasználó és hozzáférés menedzsmentre fókuszál. Mindkét területre léteznek már ipari sztenderd megoldások, mint például az IBM QRadar, és Identity Manager terméke, azonban a két terület összekapcsolására nem volt még megoldás. 
+Az informatika fejlődésével és terjedésével egyre fontosabb terület lesz az informatikai biztonságtechnika ami számos feladatot foglal magába. Jelen dolgozat ezen belül kettő területre, a biztonsági incidensek és események kezelésére, valamint a felhasználó és hozzáférés menedzsmentre fókuszál. Mindkét területen elérhetők elérhetők ipari megoldások, mint például az IBM QRadar, és Identity Manager terméke, azonban a két terület jellemzően csak lazán kapcsolódik egymással, szorosabb integrációra technikai megoldás sem állt rendelkezésre korábban.
 
-A dolgozat célja egy ilyen integráció elkészítése és bemutatása a fent említett két termék használatával. A cél a felhasználói, és a hozzájuk kötődő folyamat információk összegyűjtése, transzformálása, majd prezentálása a QRadar számára a szabályrendszerében való felhasználásra. Ezek segítségével az egyes események új kontextusban, új információk birtokában értékelhetők ki, ami eddig nem kezelt biztonsági incidensek észlelését teszi lehetővé.
+A dolgozat célja egy ilyen integráció elkészítése és bemutatása a fent említett két termék használatával. A cél az ISIM-ből a felhasználói, és a hozzájuk kötődő folyamat információk összegyűjtése, transzformálása, majd prezentálása a QRadar számára a szabályrendszerében való felhasználásra. Ezek segítségével az egyes események új kontextusban, új információk birtokában értékelhetők ki, ami eddig nem kezelt biztonsági incidensek észlelését teszi lehetővé, ezzel teljesebbé és pontosabbá téve a biztonsági monitorozást.
 
 
-A dolgozat az információk elérhetővé tételére két megoldást mutat be: egy JAVA EE alapú webalkalmazást, és egy IBM adatintegrációs eszköz alapú megoldást. A két rendszer közti további integrációra az említett mellett egy saját megoldást is készítettem, ami olyan, a felhasználói folyamatokkal kapcsolatos információkat továbbít a QRadar számára,  amik eddig kihasználatlanok voltak.
+A dolgozat az adatok elérhetővé tételére két megoldást mutat be: egy JAVA EE alapú webalkalmazást, és egy IBM adatintegrációs eszköz alapú megoldást. A két rendszer közti további integrációra az említett mellett egy saját megoldást is készítettem, ami olyan, a felhasználói folyamatokkal kapcsolatos eseményeket továbbít a QRadar számára,  amik eddig a SIEM számára láthatatlonok voltak.
 
 
 \vfill
@@ -25,11 +25,11 @@ A dolgozat az információk elérhetővé tételére két megoldást mutat be: e
 %----------------------------------------------------------------------------
 \chapter*{Abstract}\addcontentsline{toc}{chapter}{Abstract}
 
-With the continous advancement of computers and technology, IT Security is becoming an increasingly important field of study, which envelops a multitude of tasks. This thesis focuses on two fields of IT security: security information and event management, and identity and access management. Both of these have had industry standard solutions for years, like IBM QRadar, and IBM Security Identity Manager, but there were no previous solutions for connecting the two.
+With the continous advancement of computers and technology, IT Security is becoming an increasingly important field of study, which includes a multitude of tasks. This thesis focuses on two fields of IT security: security information and event management, and identity and access management. Both of these fields have industry solutions available for years, like IBM QRadar, and IBM Security Identity Manager, but the two areas are typically loosely connected, for a more tight integration there was no technical solution available yet.
 
-The goal of this thesis project is to implement and present a solution for this problem, using the aforementioned two products. The end goal is the collection, transformation, and presentation of user identity and access information, including the processes managing these, for QRadar. With this data, the security events handled by QRadar can be evaluatied in a new context, detecting previously unhandled incidents.
+The aim of this thesis project is to implement and present a solution for this problem, using the aforementioned two products. The goal is the collection, transformation, and presentation of user identity and access information, including the processes managing these from ISIM to QRadar. With this data, the security events handled by QRadar can be evaluatied in a new context, detecting previously unhandled incidents making security monitoring more complete and accurate.
 
-This thesis presents two solutions for this integration: a Java EE based web application, and a custom solution, using an IBM data integration framework. For further integration between the two products, I've also developed a different integration solution, which generates security events for QRadar, from previously unutilized information about processes managing user data and access information.
+This thesis presents two solutions for this integration: a Java EE based web application, and a custom solution, using an IBM data integration framework. For further integration between the two products, I've also developed a different integration solution, which generates security events for QRadar, from previously unseen events about processes managing user data and access information.
 
 
 \vfill
