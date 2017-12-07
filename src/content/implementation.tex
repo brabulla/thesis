@@ -159,7 +159,7 @@ A QRadar connector működéséhez legalább a QRadar példány elérhetőségé
 
 Végeredményképp létrehoztam a felvázolt működésnek megfelelő connector-t, ami képes a paraméterezés alapján megadott QRadar példánnyal felvenni a kapcsolatot, számára adatot feltölteni, módosítani, törölni. Ez bármilyen assembly line-ban használható, későbbi projektek során is.
 
-\subsection{Connector működésének bemutatása}
+\subsection{Connector működésének bemutatása} \label{subsec:conntest}
 A fejlesztés következő lépése az elkészített connector tesztelése volt, valamint a helyes működés ellenőrzése. Az ennek során szerzett tapasztalatokra építve készítettem el a \ref{sec:queryk}. \nameref{sec:queryk} fejezetben leírt integrációs feladatok megoldását.
  \begin{figure}[t]
 	\centering
@@ -237,30 +237,34 @@ A Websphere alapú alkalmazás a fenti területkre az alábbi módon kínál meg
 	
 \end{itemize}
 
-\todo UML diagramok?
 \subsection{Architektúra tervezése}
 
 Mivel az alkalmazás egy projekt részeként valósult meg, többen dolgoztunk rajta, ez különösen fontossá tette az architektúra átgondolását és alapos megtervezését. 
 
 A cél egy olyan alkalmazás fejlesztése volt, ami mind a jövőbeni fejlesztők, mind az üzemeltetéssel foglalkozó személyzet számára könnyen használható. Jelen esetben a fejlesztők alatt elsősorban azokat a személyeket értem, akik majd későbbiekben új lekérdezés (query) típusokat készítenek a rendszerhez. Ezek a személyek mélyebb ismeretekkel rendelkeznek a rendszerrel kapcsolatban, ám fontos, hogy számukra is egy könnyen használható interfészt biztosítsunk. Emellett fontos, hogy az új lekérdezés típusok könnyen, az alkalmazás minimális -- vagy optimális esetben semmilyen -- módosításával bevezethetők legyenek. Ezzel jól szétválasztható a fejlesztők és az üzemeltetők számára szükséges tudás, mivel egy már kész, új típust egy, a rendszer belső működéséhez kevésbé értő ember is gyorsan be tud vezetni. Üzemeltetői részről egy könnyen használható felület biztosítása volt a cél, ami egyértelmű tudósítást ad a rendszer állapotáról, és megkönnyíti új lekérdezések konfigurálását, azok helyes felparaméterezését.
 
+A könnyű használat mellett fontos szempont volt, hogy az alkalmazás megfelelően robusztus legyen egy vállalati környezet számára is. Fontos cél volt az adatok naprakészen tartása mellett az adatok konziszteciájának megőrzése, valamint a megfelelő performancia elérése, de a túlterhelés elkerülése. Ezen szempontok egy része egymással ellentétes követelményekkel rendelkezik az alkalmazás számára\footnote{Például: az adatok naprakészen tartása indokolná a lekérdezések folyamatosan ismétlődő futtatását, várakozási idő nélkül, a konzisztencia pedig mindig az összes adat feltöltését. Ez azonban lassan lefutó lekérdezések esetén erősen túlterhelné a rendszert, és bizonyos, fontosabb és gyorsabb lekérdezések nem tudnának érvényesülni. A REST API túlterhelése is egy probléma, ami a feleslegesen nagy mennyiségű adat folyamatos feltöltése miatt jelentkezhet.}, így a tervezésnél kompromisszumokat kellett kötnünk.
+
 A tervezésnél az alábbi döntéseket hoztuk:
 
 \begin{itemize}
-	\item Egységes, moduláris lekérdezésrendszer
+	\item Egységes, moduláris lekérdezésrendszer használata
 	\begin{itemize}
-		\item A különböző lekérdezés típusok egy közös interfészt implementálnak.
+		\item A különböző lekérdezés típusok egy közös interfészt implementálnak, ami miatt a típusok köre könnyen bővíthető utólag is.
 		\item Minden ténylegesen lefutó lekérdezés egy lekérdezés típusból, és annak a felparaméterezéséből áll. Ezeket egy táblában szerializálva tároljuk, ahonnan az ütemező felolvassa, és futtatja őket.
+		\item Az egyes lekérdezések felparaméterezése egy webes felületen végezhető, ami támogatja az rendszer alapján a rendelkezésre álló paraméter értékeket.
 	\end{itemize}
 	
 	\item Két ütemező, külön időzítéssel, egy az ISIM lekérésekhez, egy a QRadar szinkronizációhoz.
+		\begin{itemize}
+		\item Mindkét ütemező periódusideje külön állítható, valamint a két ütemező használata miatt az összes lekérdezésnél külön állítható az IDM lekérdezés, és a QRadar feltöltés között eltelt intervallum nagysága.
+	\end{itemize}
 	
 	\item Kétfázisú lekérdezések, több lehetséges állapottal (Lsd.: \ref{fig:refloaderstates} Ábra)
 	\begin{itemize}
 		\item Minden lekérdezés két fázisból áll: egy ISIM irányú lekérési fázisból, és egy feltöltési fázisból a QRadar felé
-		\item A lekérdezés létrejöttekor egy kezdeti állapotban van.
-		\item Az ütemező elindítja a lekérdezést, ekkor IDM\_SYNC\_RUNNING állapotba kerül, és elkezd futni a definiált ISIM lekérdezés.
-		\item Ha a folyamat sikeres volt, IDM\_SYNC\_COMPLETED állapotba kerül, ha nem, akkor IDM\_FAILED-be
+		\item A lekérdezés létrejöttekor egy kezdeti állapotban van, majd ha az IDM ütemező elindítja, átkerül IDM\_SYNC\_RUNNING állapotba.
+		\item Ha az IDM lekérdezés sikeres volt, IDM\_SYNC\_COMPLETED állapotba kerül, ha nem, akkor IDM\_FAILED-be.
 		\item Az IDM\_SYNC\_COMPLETED állapot után a lekérdezés vár, amíg az ütemező el nem indítja a QRadar irányú szinkronizációt, vagy újra sorra nem kerül az ISIM ütemező számára.
 		\item A QRadar szinkronizáció futása ha sikeres, akkor COMPLETED állapotba kerül a lekérdezés. Ezt az állapotot nevezzük a sikeres végállapotnak.
 		\item Ha a QRadar szinkronizáció nem volt sikeres, akkor QRADAR\_SYNC\_FAILED állapotba kerül. Ekkor a lekérdezés vár, hogy a két ütemező közül valamelyik elindítsa az egyik feladatát.
@@ -422,7 +426,7 @@ A következő lépés az adatok átalakítása volt a QRadar számára könnyen 
 	
 	\item Az egyes attribútumok elválasztása pontosvesszővel. Azért erre a karakterre esett a választásom, mert ezt gyakran használják ilyen célra, például az LDAP konvenciók szerint is, és pont emiatt az LDAP attribútumok értékében egy tiltott karakter, és bár közvetlenül relációs adatbázisból szelektálunk, ezek a táblák többnyire az LDAP adatbázisból kinyert, vagy ott is tárolt információkat tartalmaznak.
 	
-	\item Az új sor karakterek eltávolítása, valamint a pontosvesszők \todo kieszképelése az attribútumok értékeiből.
+	\item Az új sor karakterek eltávolítása, valamint a nem megengedett karakterek (például pontosvesszők) backslash-el történő prefixálása az attribútumok értékeiben.
 \end{itemize} 
 
 %Ebből tehát ehhez hasonló sorok adódtak:

@@ -26,7 +26,7 @@
   \bibEarlyBegin
 \else \let\bibEarlyEnd\relax \fi
 
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 \frenchspacing
 \makeatletter
 \global\def\bibIE@lowc{%
@@ -93,6 +93,36 @@
 \def\bibInSelf#1{In u\H{o}: }
 \csname bibOverride\endcsname
 
+\bibitem{wsscheduler}
+IBM Knowledgebase:
+\bibNewBlock Configuring managed scheduled executors.
+\bibNewBlock
+  \url{https://www.ibm.com/support/knowledgecenter/en/SS7K4U_liberty/com.ibm.websphere.wlp.zseries.doc/ae/twlp_config_scheduledexecutor.html}.
+
+\bibitem{wsdatasource}
+IBM Knowledgebase:
+\bibNewBlock Configuring relational database connectivity in liberty.
+\bibNewBlock
+  \url{https://www.ibm.com/support/knowledgecenter/en/SS7K4U_liberty/com.ibm.websphere.wlp.zseries.doc/ae/twlp_dep_configuring_ds.html}.
+
+\bibitem{wsdropin}
+IBM Knowledgebase:
+\bibNewBlock Deploying applications in liberty.
+\bibNewBlock
+  \url{https://www.ibm.com/support/knowledgecenter/en/SSEQTP_liberty/com.ibm.websphere.wlp.doc/ae/twlp_dep.html}.
+
+\bibitem{dynacache}
+IBM Knowledgebase:
+\bibNewBlock Distributed map interface for dynamic caching.
+\bibNewBlock
+  \url{https://www.ibm.com/support/knowledgecenter/en/SSEQTP_8.5.5/com.ibm.websphere.wlp.doc/ae/rwlp_feature_distributedMap-1.0.html}.
+
+\bibitem{tdientry}
+IBM Knowledgebase:
+\bibNewBlock The entry object.
+\bibNewBlock
+  \url{https://www.ibm.com/support/knowledgecenter/en/SSCQGF_7.1.0/com.ibm.IBMDI.doc_7.1/entryobject.htm}.
+
 \bibitem{conndev}
 IBM Knowledgebase:
 \bibNewBlock Hivatalos útmutó tdi connector fejlesztéshez.
@@ -122,12 +152,6 @@ IBM Knowledgebase:
 \bibNewBlock
   \url{https://www.ibm.com/support/knowledgecenter/en/SSCQG_7.1.1/com.ibm.IBMDI.do_7.1.1/adminguide36.htm}.
 
-\bibitem{tdientry}
-IBM Knowledgebase:
-\bibNewBlock A tdi entry osztály leírása a hivatalos ibm dokumentációban.
-\bibNewBlock
-  \url{https://www.ibm.com/support/knowledgecenter/en/SSCQGF_7.1.0/com.ibm.IBMDI.doc_7.1/entryobject.htm}.
-
 \bibitem{slf4j}
 Quality~Open Software:
 \bibNewBlock Slf4j dokumentáció.
@@ -141,7 +165,7 @@ Apache software foundation:
 
 \bibitem{ldapdn}
 Unknown:
-\bibNewBlock Ldap dns and rdns.
+\bibNewBlock Ldap dn, and rdn definition.
 \bibNewBlock \url{https://www.ldap.com/ldap-dns-and-rdns}.
 
 \end{thebibliography}

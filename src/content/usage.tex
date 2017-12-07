@@ -41,23 +41,12 @@ A TDI connector - QRadar irányú authentikáció biztosításához szükséges 
 Amennyiben biztonsági szempontból szükséges, beállítható, hogy a kulcsot használó applikációk milyen csoport tagsággal rendelkezzenek, valamint a hozzáférés elévülési ideje. A csoport tagság definiálja azt, hogy pontosan milyen típusú operációkhoz fog hozzáférni az alkalmazás, ezért fontos, hogy a connector által használt tokenhez tartozó csoport tudja írni és olvasni is a reference data-kat.
 
 \subsection{Használat}
-
+Az előzetes konfigurációs lépések elvégzése után a connector elérhető a TDI grafikus szerkesztőjén keresztül, és szabadon felhasználható assembly line-okban a többi, beépített connector-nak megfelelő módon. Egy ilyen felhasználásra mutat példát a \ref{subsec:conntest} fejezetben leírt példa. 
 \section{Websphere alapú alkalmazás}
 \subsection{Dependenciák}
 Az alkalmazás egy Java EE webalkalmazás, amely WebSphere alkalmazásszerverre lett tervezve, azon belül pedig a WebSphere Liberty változatára. Mivel csak ezen lett tesztelve, ezért más alkalmazásszerver nem támogatott, de apróbb változtatásokkal valószínűleg más szerveren is futtatható, de a leírásnak nem célja egy mindenre kiterjedő útmutatót adni. 
 
 A teszteléshez 17.0.0.2-es Liberty installációt használtam, valamint fontos, hogy a Liberty szerver támogassa, és legyenek telepítve az alábbi beépülők: webProfile-7.0, localConnector-1.0, jsp-2.3, jca-1.7, concurrent-1.0, appSecurity-2.0, servlet-3.1, passwordUtilities-1.0, distributedMap-1.0.
-
-Az ütemezéshez az alkalmazás a commonj \cite{commonj} könyvtárat használja, így ezt is elérhetővé kell tenni a szerver számára. 
-
-Mivel ez az alkalmazás is az általam készített wrappert használja a QRadarral való kommunikációra, ezért a \ref{subsec:wrapdep}-ben leírtaknak megfelelően annak a dependenciáira is szükség van, nevezetesen az SLF4J könyvtárra, és az Apache Wink könyvtár megfelelő részeire.
-
-Az alkalmazás működéséhez továbbá szükség van a megfelelő verziójú DB2-es Java driverre\footnote{A megfelelő verzió jelen esetben azt jelenti, hogy a felhasznált driverek az adott, felhasznált DB2 instanciának megfelelő driverek kell hogy legyenek} és licenszre, amiket az alkalmazás az ISIM adatbázisaihoz, valamint a saját adatbázisaihoz való kapcsolódásra használ. Ezeket egy library formájában fel kell venni a Liberty szerver definíciós XML-jébe, továbbá a megfelelő adatbázisokat a hozzájuk tartozó authentikációs adatokkal dataSource-ként.\cite{wsdatasource}
-
-Ezen kívül szükséges a szerver konfigurációs állományába felvenni / módosítani az alábbi adatokat:
-\begin{itemize}
-	\item distributedMap \cite{dynacache} : Az alkalmazás által használt DynaCache definíciója 
-\end{itemize}
 
 %
 %\begin{itemize}
@@ -72,8 +61,61 @@ Ezen kívül szükséges a szerver konfigurációs állományába felvenni / mó
 %	\item distributedMap-1.0 - Az alkalmazás által használt DynaCache cache-elési módszerhez.
 %\end{itemize}
 
+Az ütemezéshez az alkalmazás a commonj \cite{commonj} könyvtárat használja, így ezt is elérhetővé kell tenni a szerver számára. 
+
+Mivel ez az alkalmazás is az általam készített wrappert használja a QRadarral való kommunikációra, ezért a \ref{subsec:wrapdep}-ben leírtaknak megfelelően annak a dependenciáira is szükség van, nevezetesen az SLF4J könyvtárra, és az Apache Wink könyvtár megfelelő részeire.
+
+Az alkalmazás működéséhez továbbá szükség van a megfelelő verziójú DB2-es Java driverre\footnote{A megfelelő verzió jelen esetben azt jelenti, hogy a felhasznált driverek az adott, felhasznált DB2 instanciának megfelelő driverek kell hogy legyenek} és licenszre, amiket az alkalmazás az ISIM adatbázisaihoz, valamint a saját adatbázisaihoz való kapcsolódásra használ. Ezeket egy library formájában fel kell venni a Liberty szerver definíciós XML-jébe, továbbá a megfelelő adatbázisokat a hozzájuk tartozó authentikációs adatokkal dataSource-ként.\cite{wsdatasource}
+
+A fent említetteken kívül, valamint az általános konfigurációs értékeken kívül szükséges a szerverhez tartozó server.xml állományába felvenni / módosítani a következő konfigurációs értékeket:
+\begin{itemize}
+	\item distributedMap\cite{dynacache}: Az alkalmazás által használt DynaCache definíciója 
+	\item managedScheduledExecutorService\cite{wsscheduler}: Az alkalmazás által használt ütemező definíciója
+\end{itemize}
+
 \subsection{Telepítés}
+A dependenciák elérhetővé tétele, és a szerver megfelelő felkonfigurációja után az alkalmazás telepítésére két mód is rendelkezésre áll. Lehetőség van a lefordított alkalmazás csomagolt formában való elhelyezésére a Liberty által rendszeresen ellenőrzött \textit{dropins} mappában, vagy az alkalmazás konfigurációjában elhelyezni egy rekordot, ami az telepítendő applikáció elérési útját tartalmazza. \cite{wsdropin}
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=0.7\linewidth]{figures/refloader_ui/all_states}
+	\caption{A WebSphere alapú integrációs megoldás főképernyője, az összes lehetséges query állapottal.}
+	\label{fig:allstates}
+\end{figure}
 
 \subsection{Használat}
 
-% mit hova másoljunk, cert hozzáadása a megfelelő storehoz, stb
+Az alkalmazás egy Bootstrap alapú felhasználói felületről érhető el. A konfigurációban megadott bejelentkezési adatok segítségével belépve egy központi oldal fogad, amin láthatók a felkonfigurált lekérdezések, azok állapotai, valamint az ütemezési információik. A felületen megjelenített mezők jelentése a következő:
+
+
+
+\begin{itemize}
+	\item Name and description: A szinkronizációs feladat neve és leírása, amit annak felvételekor adhatunk meg.
+	\item Type: A lekérdezés típusa
+	\item Reference data name: A lekérdezés által kezelt reference data neve.
+	\item Interval: A lekérdezés futtatási gyakorisága.
+	\item Synchronization: Információk a lekérdezés ütemezésével kapcsolatban.
+	\item Status: Információ a lekérdezés aktuális állapotáról.
+	\item Actions: Lenyíló menü a lekérdezéssel kapcsolatos máveletek indítására.
+\end{itemize}
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=0.8\linewidth]{figures/refloader_ui/add_new2}
+	\caption{Az új query-k hozzáadását támogató felület}
+	\label{fig:addnew}
+\end{figure}
+
+Egy felvett lekérdezés típuson 5 művelet típus hajtható végre, amik a következők:
+\begin{itemize}
+	\item Synchronize now: Az adott lekérdezést azonnal hozzáadja az ütemezési sorhoz, attól függetlenül, hogy milyen ütemezési paraméterekkel rendelkezik, és milyen állapotban van.
+	\item Reload: Frissíti a lekérdezés állapotát és a hozzá kapcoslódó információkat a felületen.
+	\item View content: Egy felugró ablakban megmutatja a feltöltött reference data állapotát, az alkalmazás által tárolt lokális állapot alapján.
+	\item Preview: Az ISIM-ből lekérdezett adatokat mutatja olyan lekérdezéseknél, amelyek még nem töltötték fel az eredményeket a QRadarnak.
+	\item Delete: Törli a lekérdezést.
+\end{itemize}
+
+Új query felvételéhez a bal felül található "Add query" gomb használható, ami egy új oldalra, a \ref{fig:addnew}. ábrán láthatóra irányít át. Ezen az oldalon megadhatjuk a query típusát, ami alapján az oldal kezelőfelülete megváltozik, és a query által használható paraméterek konfigurlását lehetővé tevő mezők lesznek elérhetők rajta. A mezők, ahol releváns, segítik a kitöltést, és felkínáljak a lehetséges inputokat. A felkonfiruált lekérdezést elmentve az bekerül az ütemezési sorba, és végrehajtódik, ha rá kerül a sor.
+
+
+
+% \subsubsection{Fejlesztői útmutató} Legyen itt pár szó arról hogy hogyan lehet új query típusokat definiálni?
