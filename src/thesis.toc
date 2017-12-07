@@ -54,8 +54,8 @@
 \select@language {magyar} \contentsline {section}{\numberline {4.2}Websphere alap\IeC {\'u} alkalmaz\IeC {\'a}s}{32}{section.4.2}
 \select@language {magyar} \contentsline {subsection}{\numberline {4.2.1}Dependenci\IeC {\'a}k}{32}{subsection.4.2.1}
 \select@language {magyar} \contentsline {subsection}{\numberline {4.2.2}Telep\IeC {\'\i }t\IeC {\'e}s}{33}{subsection.4.2.2}
-\select@language {magyar} \contentsline {subsection}{\numberline {4.2.3}Haszn\IeC {\'a}lat}{33}{subsection.4.2.3}
+\select@language {magyar} \contentsline {subsection}{\numberline {4.2.3}Haszn\IeC {\'a}lat}{34}{subsection.4.2.3}
 \select@language {magyar} \contentsline {chapter}{\numberline {5}\IeC {\"O}sszefoglal\IeC {\'a}s}{36}{chapter.5}
-\select@language {magyar} \contentsline {chapter}{Irodalomjegyz\IeC {\'e}k}{39}{chapter*.34}
-\select@language {magyar} \contentsline {chapter}{F\IeC {\"u}ggel\IeC {\'e}k}{40}{appendix*.35}
-\select@language {magyar} \contentsline {section}{\numberline {F.1}Feldolgozott attrib\IeC {\'u}tumok}{40}{section.F.1}
+\select@language {magyar} \contentsline {chapter}{Irodalomjegyz\IeC {\'e}k}{41}{chapter*.36}
+\select@language {magyar} \contentsline {chapter}{F\IeC {\"u}ggel\IeC {\'e}k}{42}{appendix*.37}
+\select@language {magyar} \contentsline {section}{\numberline {F.1}Feldolgozott attrib\IeC {\'u}tumok}{42}{section.F.1}

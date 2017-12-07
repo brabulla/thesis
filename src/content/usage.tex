@@ -1,4 +1,4 @@
-\chapter{Megoldások telepítése, használata}
+\chapter{Megoldások telepítése, használata} \label{ch:usage}
 A telepítés és a használat leírásának során feltételezem, hogy már fel van telepítve, és rendelkezésre áll a felhasználni kívánt QRadar, az ISIM, a TDI, valamint a megfelelő WebSphere. A fejlesztés és a tesztelés során felhasznált applikációk verziói a következők:
 
 \begin{itemize}
@@ -41,7 +41,7 @@ A TDI connector - QRadar irányú authentikáció biztosításához szükséges 
 Amennyiben biztonsági szempontból szükséges, beállítható, hogy a kulcsot használó applikációk milyen csoport tagsággal rendelkezzenek, valamint a hozzáférés elévülési ideje. A csoport tagság definiálja azt, hogy pontosan milyen típusú operációkhoz fog hozzáférni az alkalmazás, ezért fontos, hogy a connector által használt tokenhez tartozó csoport tudja írni és olvasni is a reference data-kat.
 
 \subsection{Használat}
-Az előzetes konfigurációs lépések elvégzése után a connector elérhető a TDI grafikus szerkesztőjén keresztül, és szabadon felhasználható assembly line-okban a többi, beépített connector-nak megfelelő módon. Egy ilyen felhasználásra mutat példát a \ref{subsec:conntest} fejezetben leírt példa. 
+Az előzetes konfigurációs lépések elvégzése után a connector elérhető a TDI grafikus szerkesztőjén keresztül, és szabadon felhasználható assembly line-okban a többi, beépített connector-nak megfelelő módon. Egy ilyen felhasználásra mutat példát a \ref{subsec:conntest} fejezetben leírt példa. \cite{tditutorial}
 \section{Websphere alapú alkalmazás}
 \subsection{Dependenciák}
 Az alkalmazás egy Java EE webalkalmazás, amely WebSphere alkalmazásszerverre lett tervezve, azon belül pedig a WebSphere Liberty változatára. Mivel csak ezen lett tesztelve, ezért más alkalmazásszerver nem támogatott, de apróbb változtatásokkal valószínűleg más szerveren is futtatható, de a leírásnak nem célja egy mindenre kiterjedő útmutatót adni. 
@@ -78,7 +78,7 @@ A dependenciák elérhetővé tétele, és a szerver megfelelő felkonfiguráci�
 
 \begin{figure}[!h]
 	\centering
-	\includegraphics[width=0.7\linewidth]{figures/refloader_ui/all_states}
+	\includegraphics[width=0.8\linewidth]{figures/refloader_ui/all_states}
 	\caption{A WebSphere alapú integrációs megoldás főképernyője, az összes lehetséges query állapottal.}
 	\label{fig:allstates}
 \end{figure}

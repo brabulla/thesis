@@ -105,6 +105,12 @@ IBM Knowledgebase:
 \bibNewBlock
   \url{https://www.ibm.com/support/knowledgecenter/en/SS7K4U_liberty/com.ibm.websphere.wlp.zseries.doc/ae/twlp_dep_configuring_ds.html}.
 
+\bibitem{tditutorial}
+IBM Knowledgebase:
+\bibNewBlock Creating your first assembly line.
+\bibNewBlock
+  \url{https://www.ibm.com/support/knowledgecenter/en/SSCQGF_7.1.0/com.ibm.IBMDI.doc_7.1/CreatingyourfirstassemblyLine.htm}.
+
 \bibitem{wsdropin}
 IBM Knowledgebase:
 \bibNewBlock Deploying applications in liberty.
