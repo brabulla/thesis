@@ -33,7 +33,7 @@ A SIEM által kiértékelt eseményekhez egyéb információkat is rendel a rend
 %\end{comment}
  
 \label{lbl:reference_data}
-Ezen dokumentum és a feladat szempontjából a legfontosabb része a QRadarnak a dinamikusan feltölthető adathalmazok és azok használata szabályokban. Ezekkel a szabályokkal érhető el, hogy más adatforrásokból (jelen esetben az ISIM-ből) frissen feltöltött információk alapján változzon a kiértékelés, és ha valamilyen adat frissül, akkor naprakész maradjon a szabály által talált incidensek halmaza. A dinamikusan feltölthető adathalmazok (összefoglaló nevükön reference data) elérhetők egy REST API-n keresztül, így könnyen hozzájuk lehet férni és módosítani őket. Négy féle ilyen adathalmaz áll rendelkezésre:
+Ezen dokumentum és a feladat szempontjából a legfontosabb része a QRadarnak a dinamikusan feltölthető adathalmazok és azok használata szabályokban. Ezekkel a szabályokkal érhető el, hogy más adatforrásokból (jelen esetben az ISIM-ből) frissen feltöltött információk alapján változzon a kiértékelés, és ha valamilyen adat frissül, akkor naprakész maradjon a szabály által talált incidensek halmaza. A dinamikusan feltölthető adathalmazok (összefoglaló nevükön reference data) elérhetők egy REST API-n keresztül, így könnyen hozzájuk lehet férni és módosítani őket. Négyféle ilyen adathalmaz áll rendelkezésre:
 
 \begin{itemize}
 	\item Reference set - Olyan adathalmaz, melyben egyedi értékek sorozata található.
@@ -88,12 +88,12 @@ A TDI alapvető struktúrája úgynevezett assembly line-okból áll. Egy assemb
 A különböző adatforrások más-más formátumban kezelik az adatokat, így TDI minden be- valamint kimeneti műveletnél biztosít egy hozzárendelési lépést, amellyel megadhatjuk, hogy a külső attribútumok milyen belső attribútumokra legyenek leképezve. Ilyen ún. mapping lépést az assembly line-on bármikor végrehajthatunk, és emellett még számos átalakítási lépés áll rendelkezésre, mint például ciklusok vagy elágazások használata. Az assembly line-on haladó adatokat entry-k formájában kezeli a TDI.\cite{tdientry} Egy entry egy elemi objektum, ami nevesített attribútumok halmazát képes tárolni. Ilyen entry-t bármelyik scriptben létre lehet hozni, de egy általános TDI assembly line esetén 4 darab nevesített entry-t használunk:
 
 \begin{itemize}
-	\item work: Az assembly line állandó entry-je. Ezen az objektumon keresztül utazik az adat az egyes komponensek között, valamint ezen hajtják végre az adatmódosító műveletket a connector-ok.
-	\item conn: Ezt az entry objektumot használják a connecot-ok a köztes adatok tárolására a célrendszerrel való kapcsolat során. Ebből az entry-ből kerülnek át az egyes mapping-ek során az adatok a work entry-be.
-	\item current: Bizonyos connector-ok update módjainál elérhető változó, ami a csatlakoztatott rendszeren található adatokat tartalmazza.
+	\item work: Az assembly line állandó entry-je. Ezen az objektumon keresztül utazik az adat az egyes komponensek között, valamint ezen hajtják végre az adatmódosító műveleteket a connectorok.
+	\item conn: Ezt az entry objektumot használják a connectorok a köztes adatok tárolására a célrendszerrel való kapcsolat során. Ebből az entry-ből kerülnek át az egyes mapping-ek során az adatok a work entry-be.
+	\item current: Bizonyos connectorok update módjainál elérhető változó, ami a csatlakoztatott rendszeren található adatokat tartalmazza.
 	\item error: A hibakezelést végző komponensekben elérhető entry. A hibákkal kapcsolatos információkat tartalmazza.
 \end{itemize}
 
 A TDI talán egyik legfontosabb képessége a Javascriptből való testreszabhatóság. Ez azt jelenti, hogy az assembly line-on az adatokat szabadon manipulálhatjuk Javascriptes kódból, létrehozhatunk szkripteket amik a futtatás bizonyos pontjain aktiválódnak, valamint számtalan egyéb funkciót érhetünk el ezekből a programokból, mint például a logolás, paraméterek módosítása, vagy arbitrális kód futtatása.
 
-A dolgozat szempontjából az egyik legfontosabb része a TDI-nak a connectorok, mivel a feladat része volt egy ilyen fejelsztése, ami támogatja a kommunikációt egy QRadar szerverrel, azon belül is a QRadarban található reference data objektumokkal.
+A dolgozat szempontjából az egyik legfontosabb része a TDI-nak a connectorok, mivel a feladat része volt egy ilyen fejlesztése, ami támogatja a kommunikációt egy QRadar szerverrel, azon belül is a QRadarban található reference data objektumokkal.

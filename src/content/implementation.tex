@@ -125,7 +125,7 @@ Az alábbi metódusokat implementáltam a connector által támogatott metóduso
 A connector használatához szükséges annak megfelelő felparaméterezése. Erre a TDI a grafikus fejlesztői felületén ad lehetőséget, ahol a connector által definiált paraméterek megadására beviteli mezők állnak rendelkezésre. Minden connectornak más paraméterekre van szüksége, ezt egy tdi.xml fájl megadásával írhatjuk le, amit a connector osztályt tartalmazó JAR fájlba csomagolunk be. Ezeket aztán a GUI segítségével megadhatjuk kézzel, paraméter fájl használatával, Javascript kóddal vagy helyettesítéssel, ami akár az aktuális entitás értékeit is felhasználhatja. Az általam fejlesztett connector-hoz én is elkészítettem egy ilyen xml fájlt, ami az alábbi paramétereket képes kezelni:
 \begin{figure}
 	\centering
-	\includegraphics[width=0.7\linewidth]{figures/conn_test/parameters}
+	\includegraphics[width=1.0\linewidth]{figures/conn_test/parameters}
 	\caption{Minta a QRadar Reference Data Connector felparaméterezésére}
 	\label{fig:parameters}
 \end{figure}
@@ -161,13 +161,14 @@ Végeredményképp létrehoztam a felvázolt működésnek megfelelő connector-
 
 \subsection{Connector működésének bemutatása} \label{subsec:conntest}
 A fejlesztés következő lépése az elkészített connector tesztelése volt, valamint a helyes működés ellenőrzése. Az ennek során szerzett tapasztalatokra építve készítettem el a \ref{sec:queryk}. \nameref{sec:queryk} fejezetben leírt integrációs feladatok megoldását.
- \begin{figure}[t]
-	\centering
-	
+
+\begin{figure}[t]
+	\centering	
 	\includegraphics[width=1.0\linewidth]{figures/conn_test/connTest1}
 	\caption{Adatok kézi megadása QRadar Reference data connector teszteléséhez}
 	\label{fig:conntest1}
 \end{figure}
+
 A teszteléshez kézzel megadtam néhány inputot, melyeket megkíséreltem feltölteni a connector segítségével egy Reference Data-ba, majd ezeket ellenőriztem a QRadar belső menüjének használatával.
 A  \ref{fig:conntest1}-es Ábrán látható, hogy egy Javascript blokk formájában feltöltöm az assembly line fő változójának értékét egyedileg definiált szövegekkel. A bal oldalon látható a teszt Assembly line, ami a feltöltő script-ből áll, a QRadar Connectorból, valamint egy ciklus vezérlőből, ami az összes string értéket egyesével továbbítja a QRadar Connector felé. 
  
@@ -201,7 +202,7 @@ A felsorolásban láthatók a felhasználói fiókok neveinek egy részhalmaza. 
 
 \begin{figure}[h]
 	\centering
-	\includegraphics[width=0.9\linewidth]{figures/conn_test/orphanAccountResult}
+	\includegraphics[width=1.0\linewidth]{figures/conn_test/orphanAccountResult}
 	\caption{Árva accountok az ISIM rendszerben, melyek nagy része az egyik felügyelt Linuxos rendszerhez tartozik.}
 	\label{fig:orphanaccountresult}
 \end{figure}
@@ -448,7 +449,7 @@ A szükséges egyedi azonosítókat szintén TDI-ban generálom. Mivel nem kript
 A QRadar oldali fogadást a már említett UDP multiline syslog segítségével biztosítottam. Ezt egy eseményforrás felkonfigurálásánál kell megadni, és annyiban különbözik az átlagos syslog protokollon érkező üzenetektől, hogy az 514-es port helyett az 517-est használja, valamint a beérkező üzeneteknek rendelkeznie kell a már tárgyalt egyedi azonosítóval. Ha az azonosító két vagy több üzenetben megegyezik, akkor azokat a QRadar összefűzi egy eseménnyé.
 \begin{figure}
 	\centering
-	\includegraphics[width=0.8\linewidth]{figures/qradarproperties}
+	\includegraphics[width=1.0\linewidth]{figures/qradarproperties}
 	\caption{Egy feldolgozott esemény a QRadar felületén}
 	\label{fig:qradarproperties}
 \end{figure}

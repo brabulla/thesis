@@ -30,7 +30,7 @@ A dolgozat felépítése a következő:
 	
 	\item A \ref{ch:tech}. fejezet a projektben megismert és felhasznált technológiákat mutatja be, kitérve a feladat számára fontos technológiákra.
 	
-	\item A \ref{ch:imp}. fejezet a konkrét implementációs kérdéseket mutatja be.
+	\item A \ref{ch:imp}. fejezet a konkrét implementációs kérdéseket, valamint az ezekre adott megoldásaimat mutatja be.
 	
 	\item A \ref{ch:usage}. fejezet az elkészült megoldások telepítését és használatát mutatja be.
 	
@@ -40,11 +40,11 @@ A dolgozat felépítése a következő:
 
 \section{Security Information and Event Management}
 
-A Security Information and Event Management az informatikai rendszer részeinek monitorozásával foglalkozik biztonsági szempontból. Az infrastruktúrában található eszközök által generált eseményekhez hozzáfér a SIEM megoldás, és ez végzi az események feldolgozását és elemzését. A monitorozott rendszerek működésükkel kapcsolatos információkat biztosítanak a SIEM irányába valamilyen formában, általában log sorokként. A SIEM szerver ezeket feldolgozza, és a szabályrendszerének megfelelő eseményekből úgynevezett biztonsági incidenseket hoz létre, akár egyéb forrásokból érkező plusz informácók felhasználásával. Ilyen egyéb forrás lehet hálózati forgalom, valamilyen adatbázisból lekért adatok, vagy előre definiált, a szerverre feltöltött adatok. 
+A Security Information and Event Management az informatikai rendszer részeinek monitorozásával foglalkozik biztonsági szempontból. Az infrastruktúrában található eszközök által generált eseményekhez hozzáfér a SIEM megoldás, és ez végzi az események feldolgozását és elemzését. A monitorozott rendszerek működésükkel kapcsolatos információkat biztosítanak a SIEM irányába valamilyen formában, általában log sorokként. A SIEM szerver ezeket feldolgozza, és a szabályrendszerének megfelelő eseményekből úgynevezett biztonsági incidenseket hoz létre, akár egyéb forrásokból érkező plusz információk felhasználásával. Ilyen egyéb forrás lehet hálózati forgalom, valamilyen adatbázisból lekért adatok, vagy előre definiált, a szerverre feltöltött adatok. 
 
 Nem triviális feladat a szabályrendszert úgy konfigurálni, hogy a fals pozitív riasztások száma alacsony maradjon, miközben a valós támadásokat hatékonyan detektálja. 
 
-A megvalósítandó integráció a szabályrendszer hatékonyságát kétféle képpen segíti elő. Egyrészt, az IdM-ben redelkezésre álló információk segítségével olyan támadásminták detekciója válik lehetővé, amelyeket enélkül a SIEM nem lenne képes észlelni. Másrészt, a SIEM szabályrendszerét aktuális adatokkal látja el, amely a fals pozitív riasztások számát képes csökkenteni.
+A megvalósítandó integráció a szabályrendszer hatékonyságát kétféleképpen segíti elő. Egyrészt, az IdM-ben redelkezésre álló információk segítségével olyan támadásminták detekciója válik lehetővé, amelyeket enélkül a SIEM nem lenne képes észlelni. Másrészt, a SIEM szabályrendszerét aktuális adatokkal látja el, amely a fals pozitív riasztások számát képes csökkenteni.
 
 Emellett az általam generált és feldolgozott IdM-ből érkező jogosultsági folyamatok eseményein keresztül a SIEM további, fontos incidenseket képes detektálni.
 
@@ -52,7 +52,7 @@ Jelen feladatnak nem célja a SIEM szabályrendszerének részletes kidolgozása
 
 \section{Identity management}
 
-Az Identity management a fejlődő nagyválllatok fent említett problémáiból a nagyszámú alkalmazott hozzáféréseinek kezelését és a dolgozók, mint informatikai entitások életciklusának menedzselését oldja meg. Ez magában foglalja az entitások  rendszerezését, csoportokhoz rendelését, valamint a saját és örökölt jogaik érvényre juttatását.
+Az Identity management a fejlődő nagyvállalatok fent említett problémáiból a nagyszámú alkalmazott hozzáféréseinek kezelését és a dolgozók, mint informatikai entitások életciklusának menedzselését oldja meg. Ez magában foglalja az entitások  rendszerezését, csoportokhoz rendelését, valamint a saját és örökölt jogaik érvényre juttatását.
 
 Minden alkalmazotthoz tartozik egy rekord, amely leírja az adott ember személyes adatait és egyéb olyan információkat, amelyek szükségesek az alkalmazott jogosultságainak meghatározásához. Ezt a létrejött entitást beosztja a megadott információk szerint a megfelelő, előre definiált szerepkörökbe, amely alapján az jogokat kap bizonyos eszközök használatára. Ezen eszközök is entitásként vannak felvéve a rendszerbe, oly módon, hogy elérhetők az eszközhöz (akár szoftveres akár hardveres) tartozó információk és menedzselhető a hozzáférés.
 
@@ -75,7 +75,7 @@ Az integráció megvalósítására két architektúrát is kidolgoztunk, amelye
 \subsection{Integráció TDI segítségével}
 
 A Tivoli Directory Integrator (TDI \footnote{\label{foot:TDI}Lásd \ref{subsec:TDI} \nameref{subsec:TDI}}) egy gyakran használt, általános célú integrációs eszköz. 
-A TDI segítségével különböző adatforrásokat, amelyek más-más protokollon keresztül érhetők el, és más-más formátumban és struktúrában tárolják az adatokat, egy egységes ú.n.~Connector interfészen keresztül érhetjük el. Az adattranszformációs feladatokat ú.n.~assembly line formájában valósíthatjuk meg a TDI grafikus felületén. Egy assembly line egy műveletsort definiál, amely során felhasználhatjuk a connectorokat adat olvasásra, keresésre, kiírásra, valamint Javascript segíségével tetszőleges adattranszformációt valósíthatunk meg. A megfelelő protokoll és parser kiválasztásáról a használt connector gondoskodik, így az assembly line kompakt módon csak a valódi adattranszformációt definiálja. 
+A TDI segítségével különböző adatforrásokat, amelyek más-más protokollon keresztül érhetők el, és más-más formátumban és struktúrában tárolják az adatokat, egy egységes ú.n.~Connector interfészen keresztül érhetjük el. Az adattranszformációs feladatokat ú.n.~assembly line formájában valósíthatjuk meg a TDI grafikus felületén. Egy assembly line egy műveletsort definiál, amely során felhasználhatjuk a connectorokat adat olvasásra, keresésre, kiírásra, valamint Javascript segítségével tetszőleges adattranszformációt valósíthatunk meg. A megfelelő protokoll és parser kiválasztásáról a használt connector gondoskodik, így az assembly line kompakt módon csak a valódi adattranszformációt definiálja. 
 
 A TDI gyári connector készletét kiegészítettem egy új, saját fejlesztésű connectorral, amely a fent említett wrapper könyvtár segítségével képes reference data-kat feltölteni és lekérni a QRadartól. A hálózati erőforrások hatékony használatának céljából a connector külön akkumulálja a feltöltendő adatokat, és a futása végén, egyben tölti azokat fel. Az általam létrehozott connector egy általános célú TDI connector, így szabadon újra felhasználható nem csak az ISIM-mel való integrációra, hanem tetszőleges TDI assembly line formájában megvalósított integrációs feladatra. 
 
