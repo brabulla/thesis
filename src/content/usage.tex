@@ -13,7 +13,7 @@ A telepítés és a használat leírásának során feltételezem, hogy már fel
 \section{TDI alapú integrációs modul}
 A megoldás általam készített része egy wrapper, a hozzá tartozó segédosztályokkal, valamint egy TDI connector implementáció, ami a wrapperre épül. A wrapper önmagában is felhasználható más projektekben. A connector egy .jar formájában használható fel, amit a megfelelő TDI installáció \$INSTALL\_DIR\$/jars/connectors mappájába bemásolva használhatunk fel. 
 \subsection{Dependenciák} \label{subsec:wrapdep}
-A wrapper a HTTP hívások bonyolítására az Apache Wink\cite{wink} framework-öt használja, így ezen a library-n kívül szükség van ennek a dependenciáira is, mint például a J2EE bővítményekre.
+A wrapper a HTTP hívások bonyolítására az Apache Wink\cite{wink} frameworköt használja, így ezen a library-n kívül szükség van ennek a dependenciáira is, mint például a J2EE bővítményekre.
 
 A wrapper ezen kívül logolásra az SLF4J könyvtárat használja.\cite{slf4j}
 %\footnote{\href{https://www.slf4j.org/}{SLF4J hivatalos oldala: https://www.slf4j.org/}}
@@ -29,7 +29,7 @@ Ha csak forráskód áll rendelkezésre, akkor szükséges a projekt lefordítá
 Az elkészült jar fájl tartalmazza a fordított .class fájlokat a megfelelő mappa struktúrában, valamint a gyökérkönyvtárban a \ref{subsec:connimpl}. fejezetben leírtaknak megfelelően elkészített tdi.xml-t.
 
 \subsubsection{TDI oldali konfiguráció}
-Ahhoz, hogy a TDI használni tudja a connector-t, az elkészített .jar fájlt be kell másolni a \textit{\$TDI\_INSTALL\$/jars/connectors} mappába, valamint a szükséges dependenciákat a \textit{\$TDI\_INSTALL\$/jars/3rdparty/others} mappába.
+Ahhoz, hogy a TDI használni tudja a connectort, az elkészített .jar fájlt be kell másolni a \textit{\$TDI\_INSTALL\$/jars/connectors} mappába, valamint a szükséges dependenciákat a \textit{\$TDI\_INSTALL\$/jars/3rdparty/others} mappába.
 \subsection{Kommunikációs beállítások}
 
 \subsubsection{SSL titkosítás beállítása}
@@ -96,7 +96,7 @@ Az alkalmazás egy Bootstrap alapú felhasználói felületről érhető el. A k
 	\item Interval: A lekérdezés futtatási gyakorisága.
 	\item Synchronization: Információk a lekérdezés ütemezésével kapcsolatban.
 	\item Status: Információ a lekérdezés aktuális állapotáról.
-	\item Actions: Lenyíló menü a lekérdezéssel kapcsolatos máveletek indítására.
+	\item Actions: Lenyíló menü a lekérdezéssel kapcsolatos műveletek indítására.
 \end{itemize}
 \begin{figure}[!h]
 	\centering
@@ -108,7 +108,7 @@ Az alkalmazás egy Bootstrap alapú felhasználói felületről érhető el. A k
 Egy felvett lekérdezés típuson 5 művelet típus hajtható végre, amik a következők:
 \begin{itemize}
 	\item Synchronize now: Az adott lekérdezést azonnal hozzáadja az ütemezési sorhoz, attól függetlenül, hogy milyen ütemezési paraméterekkel rendelkezik, és milyen állapotban van.
-	\item Reload: Frissíti a lekérdezés állapotát és a hozzá kapcoslódó információkat a felületen.
+	\item Reload: Frissíti a lekérdezés állapotát és a hozzá kapcsolódó információkat a felületen.
 	\item View content: Egy felugró ablakban megmutatja a feltöltött reference data állapotát, az alkalmazás által tárolt lokális állapot alapján.
 	\item Preview: Az ISIM-ből lekérdezett adatokat mutatja olyan lekérdezéseknél, amelyek még nem töltötték fel az eredményeket a QRadarnak.
 	\item Delete: Törli a lekérdezést.
