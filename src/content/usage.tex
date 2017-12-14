@@ -83,7 +83,7 @@ A dependenciák elérhetővé tétele, és a szerver megfelelő felkonfiguráci�
 	\label{fig:allstates}
 \end{figure}
 
-\subsection{Használat}
+\subsection{Felhasználói útmutató}
 
 Az alkalmazás egy Bootstrap alapú felhasználói felületről érhető el. A konfigurációban megadott bejelentkezési adatok segítségével belépve egy központi oldal fogad, amin láthatók a felkonfigurált lekérdezések, azok állapotai, valamint az ütemezési információik. A felületen megjelenített mezők jelentése a következő:
 
@@ -114,8 +114,44 @@ Egy felvett lekérdezés típuson 5 művelet típus hajtható végre, amik a kö
 	\item Delete: Törli a lekérdezést.
 \end{itemize}
 
-Új query felvételéhez a bal felül található "Add query" gomb használható, ami egy új oldalra, a \ref{fig:addnew}. ábrán láthatóra irányít át. Ezen az oldalon megadhatjuk a query típusát, ami alapján az oldal kezelőfelülete megváltozik, és a query által használható paraméterek konfigurlását lehetővé tevő mezők lesznek elérhetők rajta. A mezők, ahol releváns, segítik a kitöltést, és felkínáljak a lehetséges inputokat. A felkonfiruált lekérdezést elmentve az bekerül az ütemezési sorba, és végrehajtódik, ha rá kerül a sor.
+Új query felvételéhez a bal felül található "Add query" gomb használható, ami egy új oldalra, a \ref{fig:addnew}. ábrán láthatóra irányít át. Ezen az oldalon megadhatjuk a query típusát, ami alapján az oldal kezelőfelülete megváltozik, és a query által használható paraméterek konfigurálását lehetővé tevő mezők lesznek elérhetők rajta. A mezők, ahol releváns, segítik a kitöltést, és felkínáljak a lehetséges inputokat. A felkonfigurált lekérdezést elmentve az bekerül az ütemezési sorba, és végrehajtódik, ha rá kerül a sor.
 
 
 
-% \subsubsection{Fejlesztői útmutató} Legyen itt pár szó arról hogy hogyan lehet új query típusokat definiálni?
+\subsection{Új query típus fejlesztése}
+
+Az üzemeltetők által használt funkciókon túl, a továbbfejlesztés szempontjából az alkalmazás legfontosabb része az új query típusok fejlesztése. Az új típusok keretein belül valósíthatók meg új use case-eket lefedő query-k, amik egyedi, a minta feladatokban nem lefedett területekre is megoldást adhatnak. Mivel az alkalmazás egy rugalmas architektúrát használ a query-k definiálására és használatára, így elég egy új Java osztály formájában megvalósítani az integrációs feladatot.
+
+A létrehozott osztálynak az alábbi kritériumokat kell teljesítenie:
+
+\begin{itemize}
+	\item Az alkalmazás által definiált, Query absztrakt ősosztály leszármazottjának kell lennie.
+	\begin{itemize}
+		\item Ez az osztály az IQuery interfészt valósítja meg, ami definiálja az egyes query-k használatához szükséges metódusokat.
+		\item A Query osztály az IQuery interfész legtöbb metódusát implementálja, ezzel egyszerűsítve a fejlesztést, mert az új típusokhoz így már csak az integrációs logikát kell megvalósítani.
+		
+	\end{itemize}
+	\item Az osztálynak meg kell valósítania a Query osztály által nem megvalósított, de az IQuery által definiált metódusokat.
+	\begin{itemize}
+		\item Meg kell adnia egy \textit{private List<ParameterSpec> parameterSpec} attribútumban azon paraméterek listáját, amelyre szüksége van a működéshez.
+		\item Az initialize metódusban meg kell valósítania azokat a feladatokat, amik előzetes végrehajtása szükséges az adott integráció sikeres megvalósításához. Például egyéb kapcsolatok inicializálása más rendszerekhez, szükséges külső modulok inicializálása, felkonfigurálása.
+		\item A getParameterSpecs metódusban, attól függően, hogy használ e felkonfigurálható paramétereket, vissza kell adnia a fentebb ismertetett parameterSpec attribútumot.
+		\item Meg kell valósítania az execute metódust, ami egy java.sql.Connection, valamint egy javax.naming.directory.DirContext típusú paramétereket vár. Ez a metódus hajtja végre az integráció ISIM oldalán használt logikát, a két kapott paramétert felhasználva. A Connection típusú paraméteren keresztül az ISIM által használt DB2 példányt éri el, a DirContext paraméteren keresztül pedig az ISIM által használt LDAP címtárat éri el. Mindkét kapcsolatot a WebSphere alkalmazás szerver biztosítja, poolozott formában.
+	\end{itemize}
+\end{itemize} 
+
+Ezután a megvalósított osztályt lefordítva, egy .jar fájl formájában a WebSphere alkalmazás által használt Java installáció által felhasznált mappák egyikébe kell másolni, és az osztály nevét hozzá kell adni az alkalmazásban dependenciaként definiált \emph{hu.ibm.refloader.spi.jar}-ban található \emph{hu.ibm.refloader.common.IQuery} fájlhoz. A telepítés befejezéséhez az alkalmazás újraindítása szükséges.
+
+Az új query típusok fejlesztését megkönnyítendő, létrehoztam egy segédosztályt, QueryToolkit néven. Ennek az osztálynak a feladata a gyakran használt segédfüggvények megvalósítása, valamint az olyan belső attribútumok felkínálása a fejlesztett query-k számára, amik hasznosak lehetnek egy-egy integrációs feladatban. Ezek az adatok azonban olyanok, amiket a rendszer a saját működéséhez is felhasznál, így ha egy támadó ezekhez hozzáfér, és módosítani tudja őket, azzal kárt tehet az alkalmazás megszokott működésében. Ezt elkerülendő, a kritikus belső paramétereket csak olvasható formában prezentálom.
+
+A QueryToolkit osztály az alábbi metódusokat valósítja meg:
+
+\begin{itemize}
+	\item getServiceTypeNameMap - Csak olvasható formában visszaadja a rendszerben található service típus tulajdonságait leíró adatokat, a service típus neve szerint indexelt mapben.
+	\item getServiceTypeDnMap - Csak olvasható formában visszaadja a rendszerben található service típus tulajdonságait leíró adatokat, a service typus DN-je szerint indexelt mapben.
+	\item getServiceTypeNameMap - Csak olvasható formában visszaadja a rendszerben található service-ek tulajdonságait leíró adatokat, a service neve szerint indexelt mapben.
+	\item getServiceTypeDnMap - Csak olvasható formában visszaadja a rendszerben található service-ek tulajdonságait leíró adatokat, a service neve szerint indexelt mapben.
+	\item getServiceDNLogMarkerMap - A service DN-je szerint indexelt mapben visszaadja az adott service-hez hozzárendelt logforrás azonosítót.
+	\item getTenantDN - Visszaadja az alkalmazás által használt kiindulási címtár egység DN-jét.
+	\item handleParameterEscaping - Egy adott String paraméter értékre eltávolítja a benne található speciális karakterek kihagyását jelző karaktereket.
+\end{itemize}

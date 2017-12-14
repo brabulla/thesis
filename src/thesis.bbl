@@ -169,6 +169,12 @@ Apache software foundation:
 \bibNewBlock Apache wink.
 \bibNewBlock \url{https://cwiki.apache.org/confluence/display/WINK/Index}.
 
+\bibitem{whatisidm}
+Techtarget:
+\bibNewBlock What is identity management.
+\bibNewBlock
+  \url{http://searchsecurity.techtarget.com/definition/identity-management-ID-management}.
+
 \bibitem{ldapdn}
 Unknown:
 \bibNewBlock Ldap dn, and rdn definition.
