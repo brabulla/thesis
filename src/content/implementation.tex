@@ -33,7 +33,7 @@ Magának a HTTP forgalomnak és a REST hívásoknak a lebonyolítására az Apac
 
 A wrapper a különböző reference data-k transzparens kezelésén túl egyéb funkciókat is ellát, mint például segéd funkciók biztosítása, vagy a hibák egységes kezelése. Ilyen segéd funkciók a különböző adattranszformációk a használt típusok és a JSON formátum között, vagy például különböző ellenőrzések egy reference data létezésére, vagy egy aszinkron törlés lefutására. A hibakezelés menedzselésére a wrapper egy saját kivétel osztályt definiál, ami minden, a sikeres lefutástól eltérő esetben (akár belső hiba, akár a QRadarral való kommunikáció közben fellépő hiba) eldobásra kerül. Ez az objektum tartalmaz egy szöveges üzenetet, ami a hiba okára utal, valamint egy státusz kódot, ami ha HTTP kommunikáció közbeni hiba történt, annak a kódját tartalmazza, ha belső működésbeli hiba (például parse-olási hiba) akkor egy 0-nál kisebb számot tartalmaz. Ez egységesen és könnyen használhatóvá teszi a felsőbb rétegek számára, ahol például logolást kezeljük, mert egyértelmű, hogy a hiba milyen forrásból adódott. A saját kivétel típus pedig tovább könnyíti a hibák elválasztását, főleg ha a wrapper-t egy nagyobb framework-ben használjuk.
 
-A wrapper támogatja a QRadar által használt összes adattípust (ALN, ALNIC, IP, NUM, PORT, DATE), az REST hívások be- és kimenetét az adott típus által megkövetett JSON formátumban állítja elő/dolgozza fel.
+A wrapper támogatja a QRadar által használt összes adattípust (ALN, ALNIC, IP, NUM, PORT, DATE), a REST hívások be- és kimenetét az adott típus által megkövetett JSON formátumban állítja elő/dolgozza fel.
 
 %Ezen kívül a QRadar reference data-i támogatják még az inputok különböző típusú validációját, valamint egy elévülési információ hozzárendelését. A típus validáció abban valósul meg, hogy beállítható a reference data-ban található adat típusa, és feltöltéskor a QRadar ezt validálja, valamint feldolgozza. A típusokra az alábbi lehetőségek állnak rendelkezésre: Alphanumeric, Alphanumeric ignore case, Numeric, IP, Port, Date. 
 
@@ -89,11 +89,11 @@ A connector életciklus ismeretében, valamint a QRadar és a REST API-jának m�
 Az alábbi metódusokat implementáltam a connector által támogatott metódusokhoz:
 
 \begin{itemize}
-	\item initialize - Az inicializálást végrehajtó metódus. Alapértelmezetten az assmbly line indulásakor hívódik meg. Lekéri az ősosztály segítségével a felületen megadott paramétereket és azokat megfelelő formátumra hozza, valamint inicializálja az olyan attribútumokat, amelyek a paraméterezés alapján más értékeket vehetnek fel. Emellett ha az opció használatban van, akkor létrehozza az új reference data-t.
+	\item initialize - Az inicializálást végrehajtó metódus. Alapértelmezetten az assembly line indulásakor hívódik meg. Lekéri az ősosztály segítségével a felületen megadott paramétereket és azokat megfelelő formátumra hozza, valamint inicializálja az olyan attribútumokat, amelyek a paraméterezés alapján más értékeket vehetnek fel. Emellett ha az opció használatban van, akkor létrehozza az új reference data-t.
 	
 	\item findEntry - Keresést végrehajtó metódus. A megadott SearchCriteria alapján végrehajt egy keresést a kiválaszott reference data elemein. Mivel a QRadar API nem definiál keresés műveletet, a keresést egy előzetesen letöltött teljes adathalmazon kell végrehajtani. Elkerülendő, hogy minden egyes findEntry híváskor újra le kelljen kérdezni a teljes adathalmazt, ez a metódus egy gyorsítótárazási megoldást használ. Az első keresésnél lekérdezi a teljes reference data-t, majd ebben a lokális példányban keres az összes többi futása során. 
 	
-	\item  putEntry - Hozzáadást, azaz adat kiírást végrehajtó metódus. A paraméterként kapott entry-t feldolgozza, és a connector számára értelmezett kulcsok (\textit{value},\textit{key},\textit{inner\_key}, \textit{payloaf}) mentén hozzáadja őket a megfelelő akkumulátorokhoz. Ha payload érkezik, amit egy az egyben továbbítunk a QRadar felé, akkor egy String-eket tartalmazó listához adja hozzá, ha key, value, inner\_key formátumban érkezik adat, akkor pedig a megfelelő reference data akkumulátorhoz.
+	\item  putEntry - Hozzáadást, azaz adat kiírást végrehajtó metódus. A paraméterként kapott entry-t feldolgozza, és a connector számára értelmezett kulcsok (\textit{value}, \textit{key}, \textit{inner\_key}, \textit{payload}) mentén hozzáadja őket a megfelelő akkumulátorokhoz. Ha payload érkezik, amit egy az egyben továbbítunk a QRadar felé, akkor egy String-eket tartalmazó listához adja hozzá, ha key, value, inner\_key formátumban érkezik adat, akkor pedig a megfelelő reference data akkumulátorhoz.
 	
 	\item modEntry - Módosítást végrehajtó metódus. Először feldolgozza a paraméterként kapott új entry-t, a régi entry-t, valamint a keresési feltételeket az alapján, hogy milyen típusú reference data-t kell módosítania. Ezután mind a négy típusra végrehajtja a szükséges lépéseket a sikeres módosításhoz. Ezek a következők:
 	\begin{itemize}
@@ -143,14 +143,14 @@ A connector használatához szükséges annak megfelelő felparaméterezése. Er
 	
 	\item Create if doesn't exist (check-box): Igaz/hamis érték, azt befolyásolja, hogy a connector létrehozza-e a reference data-t, ha az még nem létezik.
 	
-	\item Purge before add (Add only): Feltöltés előtt törölje-e a reference data tartalmát. Ez az opció csak AddOnly mód esetén jut érvénye.
+	\item Purge before add (Add only) (check-box): Feltöltés előtt törölje-e a reference data tartalmát. Ez az opció csak AddOnly mód esetén jut érvénye.
 	
 	\item Timeout type (legördülő lista): A Time to live paraméterben megadott értéket milyen módon értelmezze. Lehetséges értékei: None, UNKNOWN, LAST\_SEEN, FIRST\_SEEN. Azt befolyásolják, hogy honnantól 
 	számítson a time to live értéke.
 	
 	\item Time to live (szöveges mező): Mennyi ideig legyen elérhető az adat, a timeout type alapján. Az időtartam szöveges formátumban várja az értéket. (pl \textit{"36 hours"})
 	
-	\item Comment: Milyen magyarázattal kerüljön feltöltésre az adat
+	\item Comment (szöveges mező): Milyen magyarázattal kerüljön feltöltésre az adat
 	
 	\item Detailed log (check-box): A connector futtatásakor a naplóinformációk extra információkat is tartalmazzanak e.
 	
@@ -230,11 +230,11 @@ A Websphere alapú alkalmazás a fenti területkre az alábbi módon kínál meg
 \begin{itemize}
 	\item Futtatásra használhatjuk a WebSphere által kínált beépített ütemezőt, ami az általunk megadott szabályok szerint végrehajtja a feladatokat.
 	
-	\item Az paraméterek, valamint a feladatok elosztott végrehajtását képes a szerver kezelni, így a magas rendelkezésre állóságot elég ha a szerver szintjén biztosítjuk. Az adatok naprakészen tartásához emellett készíthetünk egyedi logikát, ami szükség esetén változtat a futtatandó feladatok során.
+	\item A paraméterek, valamint a feladatok elosztott végrehajtását képes a szerver kezelni, így a magas rendelkezésre állóságot elég ha a szerver szintjén biztosítjuk. Az adatok naprakészen tartásához emellett készíthetünk egyedi logikát, ami szükség esetén változtat a futtatandó feladatok során.
 	
 	\item Mivel az alkalmazás nem közvetlenül, hanem a szerver által biztosított kapcsolatokon keresztül csatlakozik a célrendszerhez, a költséges erőforrások poolozása könnyen támogatható, valamint biztonsági szempontból is elég a szervert biztosítani.
 	
-	\item Egy saját fejlesztésű, egyedi felülettel könnyen szétválaszthatók a fejlesztői, és a felhasználói feladatok a rendszer használatánál. A fejlesztő megvalósított néhány általános use case-t, amelyet a felhasználó később elér, hogy saját igényei szerint felparaméterezze, és használja őket. 
+	\item Egy saját fejlesztésű, egyedi felülettel könnyen szétválaszthatók a fejlesztői, és a felhasználói feladatok a rendszer használatánál. A fejlesztő megvalósított néhány általános use case-t, amelyet a felhasználó később elér, hogy saját igényei szerint felparaméterezze, és használja őket. A felhaszáló azonosítását és szerepkörének meghatározását a WAS képes biztosítani.
 	
 \end{itemize}
 
@@ -253,7 +253,7 @@ A tervezésnél az alábbi döntéseket hoztuk:
 	\begin{itemize}
 		\item A különböző lekérdezés típusok egy közös interfészt implementálnak, ami miatt a típusok köre könnyen bővíthető utólag is.
 		\item Minden ténylegesen lefutó lekérdezés egy lekérdezés típusból, és annak a felparaméterezéséből áll. Ezeket egy táblában szerializálva tároljuk, ahonnan az ütemező felolvassa, és futtatja őket.
-		\item Az egyes lekérdezések felparaméterezése egy webes felületen végezhető, ami támogatja az rendszer alapján a rendelkezésre álló paraméter értékeket.
+		\item Az egyes lekérdezések felparaméterezése egy webes felületen végezhető, ami támogatja a rendszer alapján a rendelkezésre álló paraméter értékeket.
 	\end{itemize}
 	
 	\item Két ütemező, külön időzítéssel, egy az ISIM lekérésekhez, egy a QRadar szinkronizációhoz.
@@ -491,5 +491,10 @@ Ennél a reguláris kifejezésnél az attribútum értéke pontosan az első tal
 \label{tab:properties}
 \end{table}%
 
-Az új esemény típus létrehozásának utolsó lépése az összerendelés definiálása, ami megadja, hogy egy adott, feldolgozott eseményt milyen attribútumok alapján, milyen típusba sorolunk. Ehhez kettő értéket használunk, amiket a QRadar minden eseménynél megpróbál feldolgozni. A két érték az Event ID, és az Event Category. Az Event ID az elsődleges klasszifikációt biztosítja. Amennyiben a feldolgozott érték megegyezik az egyik összerendelésben megadott értékkel, az egyértelműen beazonosítja az adott esemény típusát az összerendelés szerint. Az Event Category extra metadatokkal való kategorizálást tesz lehetővé az események között, olyan információkkal kibővítve az esemény feldolgozását mint az olvasható név, leírás, súlyosság, vagy alacsony- és magas  szintű kategória.
+Az új esemény típus létrehozásának utolsó lépése az összerendelés definiálása, ami megadja, hogy egy adott, feldolgozott eseményt milyen attribútumok alapján, milyen a QRadar által értelmezett típusba sorolunk. Az összerendelés eredménye egy QRadar által kezelt QID, amely eseményforrástól függetlenül azonosítja az esemény típusát. Az események QID-ra való leképezése több-egy típusú. Az összerendelés megadásához használhatók az előre definiált QID azonosítók, de új eseménytípust, és ezzel új QID-t is létrehozhatunk. A leképezés bementéhez kettő értéket használunk, amiket a QRadar minden eseménynél megpróbál feldolgozni. A két érték az Event ID, és az Event Category. Ez a két érték együtt kell, hogy egyértelműen azonosítsa az esemény típusát (QID). Az Event Category meghatározása nem kötelező, ha az Event ID önmagában is elég a QID meghatározásához. Esetünkben, az ISIM-ből érkező eseményekre is csak az Event ID alapján történik a leképezés.
+%Amennyiben a feldolgozott érték megegyezik az egyik összerendelésben megadott értékkel, az egyértelműen azonosítja az adott esemény típusát (QID) az összerendelés szerint. %%Az Event Category extra metadatokkal való kategorizálást tesz lehetővé az események között, olyan információkkal kibővítve az esemény feldolgozását mint az olvasható név, leírás, súlyosság, vagy alacsony- és magas  szintű kategória. 
+
+Az ISIM-ből küldött események típusa (pl.~igénylés jóváhagyása) a QRadar által körábban nem kezelt eseménytípus, ezért a különböző, ISIM-ből érkező eseménytípusokhoz egy-egy új QID-t is definiáltam. Ezt követően konfiguráltam a megfelelő Event ID, Event Category értékek QID-hoz rendelését.
+
+A fent leírt lépésekkel létrehoztam egy új, teljes QRadar oldali eseményfeldolgozó kompenenst, amely az ISIM-ből érkező eseményeket feldolgozza, meghatározza az esemény típusát és attribútumait. A feldolgozott esemény így felhasználható a szabályokban, valamint rendelkezésre áll attribútumonként indexelve, jól kereshető formában.
 

@@ -44,9 +44,10 @@ Amennyiben biztonsági szempontból szükséges, beállítható, hogy a kulcsot 
 Az előzetes konfigurációs lépések elvégzése után a connector elérhető a TDI grafikus szerkesztőjén keresztül, és szabadon felhasználható assembly line-okban a többi, beépített connector-nak megfelelő módon. Egy ilyen felhasználásra mutat példát a \ref{subsec:conntest} fejezetben leírt példa. \cite{tditutorial}
 \section{Websphere alapú alkalmazás}
 \subsection{Dependenciák}
-Az alkalmazás egy Java EE webalkalmazás, amely WebSphere alkalmazásszerverre lett tervezve, azon belül pedig a WebSphere Liberty változatára. Mivel csak ezen lett tesztelve, ezért más alkalmazásszerver nem támogatott, de apróbb változtatásokkal valószínűleg más szerveren is futtatható, de a leírásnak nem célja egy mindenre kiterjedő útmutatót adni. 
+Az alkalmazás egy Java EE webalkalmazás, amely WebSphere alkalmazásszerverre lett tervezve, azon belül pedig a WebSphere Liberty változatára. Az alkalmazást modulárisan fejlesztettem, a Websphere-specifikus hívásokat tartalmazó néhány modul átírásával könnyen migrálható más futtatókörnyezetre. A fejlesztést és tesztelést a WebSphere Liberty 17.0.0.2 verzióján végeztem, de várakozásunk szerint más WebSphere verziókon is futtatható az alkalmazás.
+%Mivel csak ezen lett tesztelve, ezért más alkalmazásszerver nem támogatott, de apróbb változtatásokkal valószínűleg más szerveren is futtatható, de a leírásnak nem célja egy mindenre kiterjedő útmutatót adni. 
 
-A teszteléshez 17.0.0.2-es Liberty installációt használtam, valamint fontos, hogy a Liberty szerver támogassa, és legyenek telepítve az alábbi beépülők: webProfile-7.0, localConnector-1.0, jsp-2.3, jca-1.7, concurrent-1.0, appSecurity-2.0, servlet-3.1, passwordUtilities-1.0, distributedMap-1.0.
+Szükséges, hogy a Liberty szerver támogassa, és legyenek telepítve az alábbi beépülők: webProfile-7.0, localConnector-1.0, jsp-2.3, jca-1.7, concurrent-1.0, appSecurity-2.0, servlet-3.1, passwordUtilities-1.0, distributedMap-1.0.
 
 %
 %\begin{itemize}
@@ -74,7 +75,7 @@ A fent említetteken kívül, valamint az általános konfigurációs értékeke
 \end{itemize}
 
 \subsection{Telepítés}
-A dependenciák elérhetővé tétele, és a szerver megfelelő felkonfigurációja után az alkalmazás telepítésére két mód is rendelkezésre áll. Lehetőség van a lefordított alkalmazás csomagolt formában való elhelyezésére a Liberty által rendszeresen ellenőrzött \textit{dropins} mappában, vagy az alkalmazás konfigurációjában elhelyezni egy rekordot, ami az telepítendő applikáció elérési útját tartalmazza. \cite{wsdropin}
+A dependenciák elérhetővé tétele, és a szerver megfelelő felkonfigurációja után az alkalmazás telepítésére két mód is rendelkezésre áll. Lehetőség van a lefordított alkalmazás csomagolt formában való elhelyezésére a Liberty által rendszeresen ellenőrzött \textit{dropins} mappában, vagy az alkalmazás konfigurációjában elhelyezni egy rekordot, ami a telepítendő applikáció elérési útját tartalmazza. \cite{wsdropin}
 
 \begin{figure}[!h]
 	\centering
@@ -96,7 +97,7 @@ Az alkalmazás egy Bootstrap alapú felhasználói felületről érhető el. A k
 	\item Interval: A lekérdezés futtatási gyakorisága.
 	\item Synchronization: Információk a lekérdezés ütemezésével kapcsolatban.
 	\item Status: Információ a lekérdezés aktuális állapotáról.
-	\item Actions: Lenyíló menü a lekérdezéssel kapcsolatos máveletek indítására.
+	\item Actions: Lenyíló menü a lekérdezéssel kapcsolatos műveletek indítására.
 \end{itemize}
 \begin{figure}[!h]
 	\centering
@@ -114,7 +115,7 @@ Egy felvett lekérdezés típuson 5 művelet típus hajtható végre, amik a kö
 	\item Delete: Törli a lekérdezést.
 \end{itemize}
 
-Új query felvételéhez a bal felül található "Add query" gomb használható, ami egy új oldalra, a \ref{fig:addnew}. ábrán láthatóra irányít át. Ezen az oldalon megadhatjuk a query típusát, ami alapján az oldal kezelőfelülete megváltozik, és a query által használható paraméterek konfigurlását lehetővé tevő mezők lesznek elérhetők rajta. A mezők, ahol releváns, segítik a kitöltést, és felkínáljak a lehetséges inputokat. A felkonfiruált lekérdezést elmentve az bekerül az ütemezési sorba, és végrehajtódik, ha rá kerül a sor.
+Új query felvételéhez a bal felül található ,,Add query'' gomb használható, ami egy új oldalra, a \ref{fig:addnew}. ábrán láthatóra irányít át. Ezen az oldalon megadhatjuk a query típusát, ami alapján az oldal kezelőfelülete megváltozik, és a query által használható paraméterek konfigurlását lehetővé tevő mezők lesznek elérhetők rajta. A mezők, ahol releváns, segítik a kitöltést, és felkínáljak a lehetséges inputokat. A felkonfiruált lekérdezést elmentve az bekerül az ütemezési sorba, és végrehajtódik, ha rá kerül a sor.
 
 
 
