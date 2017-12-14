@@ -54,7 +54,7 @@
 \select@language {magyar} \contentsline {section}{\numberline {4.2}Websphere alap\IeC {\'u} alkalmaz\IeC {\'a}s}{32}{section.4.2}
 \select@language {magyar} \contentsline {subsection}{\numberline {4.2.1}Dependenci\IeC {\'a}k}{32}{subsection.4.2.1}
 \select@language {magyar} \contentsline {subsection}{\numberline {4.2.2}Telep\IeC {\'\i }t\IeC {\'e}s}{33}{subsection.4.2.2}
-\select@language {magyar} \contentsline {subsection}{\numberline {4.2.3}Felhaszn\IeC {\'a}l\IeC {\'o}i \IeC {\'u}tmutat\IeC {\'o}}{34}{subsection.4.2.3}
+\select@language {magyar} \contentsline {subsection}{\numberline {4.2.3}Felhaszn\IeC {\'a}l\IeC {\'o}i \IeC {\'u}tmutat\IeC {\'o}}{33}{subsection.4.2.3}
 \select@language {magyar} \contentsline {subsection}{\numberline {4.2.4}\IeC {\'U}j query t\IeC {\'\i }pus fejleszt\IeC {\'e}se}{35}{subsection.4.2.4}
 \select@language {magyar} \contentsline {chapter}{\numberline {5}\IeC {\"O}sszefoglal\IeC {\'a}s}{37}{chapter.5}
 \select@language {magyar} \contentsline {chapter}{Irodalomjegyz\IeC {\'e}k}{42}{chapter*.36}
