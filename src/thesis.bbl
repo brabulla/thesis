@@ -93,6 +93,11 @@
 \def\bibInSelf#1{In u\H{o}: }
 \csname bibOverride\endcsname
 
+\bibitem{ldapdn}
+Unknown authors:
+\bibNewBlock Ldap dn, and rdn definition.
+\bibNewBlock \url{https://www.ldap.com/ldap-dns-and-rdns}.
+
 \bibitem{wsscheduler}
 IBM Knowledgebase:
 \bibNewBlock Configuring managed scheduled executors.
@@ -174,10 +179,5 @@ Techtarget:
 \bibNewBlock What is identity management.
 \bibNewBlock
   \url{http://searchsecurity.techtarget.com/definition/identity-management-ID-management}.
-
-\bibitem{ldapdn}
-Unknown:
-\bibNewBlock Ldap dn, and rdn definition.
-\bibNewBlock \url{https://www.ldap.com/ldap-dns-and-rdns}.
 
 \end{thebibliography}

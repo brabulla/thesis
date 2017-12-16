@@ -10,6 +10,7 @@ A level-1 auxiliary file: content/technologies.aux
 A level-1 auxiliary file: content/implementation.aux
 A level-1 auxiliary file: content/usage.aux
 A level-1 auxiliary file: content/summary.aux
+A level-1 auxiliary file: content/acknowledgement.aux
 A level-1 auxiliary file: content/appendices.aux
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
@@ -27,12 +28,12 @@ Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 You've used 15 entries,
             4991 wiz_defined-function locations,
-            1176 strings with 13691 characters,
-and the built_in function-call counts, 23384 in all, are:
-= -- 4192
+            1177 strings with 13726 characters,
+and the built_in function-call counts, 23582 in all, are:
+= -- 4235
 > -- 105
 < -- 0
-+ -- 1607
++ -- 1624
 - -- 60
 * -- 343
 := -- 1070
@@ -41,23 +42,23 @@ call.type$ -- 15
 change.case$ -- 60
 chr.to.int$ -- 0
 cite$ -- 15
-duplicate$ -- 3332
+duplicate$ -- 3366
 empty$ -- 661
 format.name$ -- 30
-if$ -- 4913
+if$ -- 4956
 int.to.chr$ -- 0
 int.to.str$ -- 15
 missing$ -- 0
 newline$ -- 171
 num.names$ -- 30
-pop$ -- 905
+pop$ -- 914
 preamble$ -- 1
 purify$ -- 45
 quote$ -- 22
 skip$ -- 254
 stack$ -- 0
-substring$ -- 2572
-swap$ -- 2481
+substring$ -- 2598
+swap$ -- 2507
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0

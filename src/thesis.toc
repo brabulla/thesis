@@ -57,6 +57,7 @@
 \select@language {magyar} \contentsline {subsection}{\numberline {4.2.3}Felhaszn\IeC {\'a}l\IeC {\'o}i \IeC {\'u}tmutat\IeC {\'o}}{33}{subsection.4.2.3}
 \select@language {magyar} \contentsline {subsection}{\numberline {4.2.4}\IeC {\'U}j query t\IeC {\'\i }pus fejleszt\IeC {\'e}se}{35}{subsection.4.2.4}
 \select@language {magyar} \contentsline {chapter}{\numberline {5}\IeC {\"O}sszefoglal\IeC {\'a}s}{37}{chapter.5}
-\select@language {magyar} \contentsline {chapter}{Irodalomjegyz\IeC {\'e}k}{42}{chapter*.36}
-\select@language {magyar} \contentsline {chapter}{F\IeC {\"u}ggel\IeC {\'e}k}{43}{appendix*.37}
-\select@language {magyar} \contentsline {section}{\numberline {F.1}Feldolgozott attrib\IeC {\'u}tumok}{43}{section.F.1}
+\select@language {magyar} \contentsline {chapter}{K\IeC {\"o}sz\IeC {\"o}netnyilv\IeC {\'a}n\IeC {\'\i }t\IeC {\'a}s}{39}{chapter*.34}
+\select@language {magyar} \contentsline {chapter}{Irodalomjegyz\IeC {\'e}k}{43}{chapter*.37}
+\select@language {magyar} \contentsline {chapter}{F\IeC {\"u}ggel\IeC {\'e}k}{44}{appendix*.38}
+\select@language {magyar} \contentsline {section}{\numberline {F.1}Feldolgozott attrib\IeC {\'u}tumok}{44}{section.F.1}

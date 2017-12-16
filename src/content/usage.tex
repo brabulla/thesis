@@ -92,7 +92,7 @@ Az alkalmazás egy Bootstrap alapú felhasználói felületről érhető el. A k
 
 \begin{itemize}
 	\item Name and description: A szinkronizációs feladat neve és leírása, amit annak felvételekor adhatunk meg.
-	\item Type: A lekérdezés típusa
+	\item Type: A lekérdezés típusa.
 	\item Reference data name: A lekérdezés által kezelt reference data neve.
 	\item Interval: A lekérdezés futtatási gyakorisága.
 	\item Synchronization: Információk a lekérdezés ütemezésével kapcsolatban.
@@ -135,9 +135,10 @@ A létrehozott osztálynak az alábbi kritériumokat kell teljesítenie:
 	\item Az osztálynak meg kell valósítania a Query osztály által nem megvalósított, de az IQuery által definiált metódusokat.
 	\begin{itemize}
 		\item Meg kell adnia egy \textit{private List<ParameterSpec> parameterSpec} attribútumban azon paraméterek listáját, amelyre szüksége van a működéshez.
+		\item Konstruktorában legalább a nevét, a leírását, és az általa használt reference data típusát definiálnia kell.
 		\item Az initialize metódusban meg kell valósítania azokat a feladatokat, amik előzetes végrehajtása szükséges az adott integráció sikeres megvalósításához. Például egyéb kapcsolatok inicializálása más rendszerekhez, szükséges külső modulok inicializálása, felkonfigurálása.
-		\item A getParameterSpecs metódusban, attól függően, hogy használ e felkonfigurálható paramétereket, vissza kell adnia a fentebb ismertetett parameterSpec attribútumot.
-		\item Meg kell valósítania az execute metódust, ami egy java.sql.Connection, valamint egy javax.naming.directory.DirContext típusú paramétereket vár. Ez a metódus hajtja végre az integráció ISIM oldalán használt logikát, a két kapott paramétert felhasználva. A Connection típusú paraméteren keresztül az ISIM által használt DB2 példányt éri el, a DirContext paraméteren keresztül pedig az ISIM által használt LDAP címtárat éri el. Mindkét kapcsolatot a WebSphere alkalmazás szerver biztosítja, poolozott formában.
+		\item A getParameterSpecs metódusban, attól függően, hogy használ e felkonfigurálható paramétereket, vissza kell adnia a fentebb ismertetett parameterSpec attribútumot. A definiált paramétereket az execute metódusban lehet felhasználni. A Query ősosztály getParameters() függvénye ad vissza egy mapet, amelyből a paraméter nevével történő indexeléssel lehet kinyerni a kívánt paraméter értékét.
+		\item Meg kell valósítania az execute metódust, ami egy java.sql.Connection, valamint egy javax.naming.directory.DirContext típusú paramétereket vár. Ez a metódus hajtja végre az integráció ISIM oldalán használt logikát, a két kapott paramétert felhasználva. A Connection típusú paraméteren keresztül az ISIM által használt DB2 példányt éri el, a DirContext paraméteren keresztül pedig az ISIM által használt LDAP címtárat éri el. Mindkét kapcsolatot a WebSphere alkalmazás szerver biztosítja, poolozott formában. A függvény egy ReferenceData, vagy abból származó típusú objektummal kell hogy visszatérjen, ami tartalmazza az IDM lekérés eredményét.
 	\end{itemize}
 \end{itemize} 
 
